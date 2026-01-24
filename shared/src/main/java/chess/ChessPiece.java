@@ -1,8 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Represents a single chess piece
@@ -183,8 +183,8 @@ public class ChessPiece {
     private void addPawnMoveMaybePromote(ChessPosition from, ChessPosition to, int promoteRow, List<ChessMove> moves) {
         if (to.getRow() == promoteRow) {
             moves.add(new ChessMove(from, to, PieceType.QUEEN));
-            moves.add(new ChessMove(from, to, PieceType.BISHOP));
             moves.add(new ChessMove(from, to, PieceType.ROOK));
+            moves.add(new ChessMove(from, to, PieceType.BISHOP));
             moves.add(new ChessMove(from, to, PieceType.KNIGHT));
         }
         else {

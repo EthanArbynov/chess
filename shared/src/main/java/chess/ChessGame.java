@@ -82,6 +82,10 @@ public class ChessGame {
         ChessPosition start = move.getStartPosition();
         ChessPiece piece = board.getPiece(start);
 
+        if (piece == null) {
+            throw new InvalidMoveException("No piece at start position");
+        }
+
         if (piece.getTeamColor() != teamTurn) {
             throw new InvalidMoveException("Not your turn");
         }
@@ -218,6 +222,10 @@ public class ChessGame {
     private boolean isInCheck(ChessBoard b, TeamColor teamColor) {
         ChessPosition kingPos = findKing(b, teamColor);
         TeamColor enemy = opposite(teamColor);
+
+        if (kingPos == null) {
+            return true;
+        }
 
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
