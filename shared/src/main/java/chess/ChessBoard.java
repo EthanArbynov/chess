@@ -68,4 +68,51 @@ public class ChessBoard {
             squares[6][i] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         }
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        ChessBoard otherBoard = (ChessBoard) other;
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+
+                ChessPiece thisPiece = this.squares[i][j];
+                ChessPiece otherPiece = otherBoard.squares[i][j];
+
+                if (thisPiece == null && otherPiece != null) {
+                    return false;
+                }
+
+                if (thisPiece != null && otherPiece == null) {
+                    return false;
+                }
+
+                if (thisPiece != null && !thisPiece.equals(otherPiece)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPiece piece = squares[i][j];
+                if (piece == null) {
+                    hash = hash * 31;
+                } else {
+                    hash = hash * 31 + piece.hashCode();
+                }
+            }
+        }
+
+        return hash;
+    }
 }

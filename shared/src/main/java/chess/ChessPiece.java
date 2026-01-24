@@ -195,4 +195,20 @@ public class ChessPiece {
     private boolean inBounds(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChessPiece)) return false;
+        ChessPiece other = (ChessPiece) o;
+
+        return pieceColor == other.pieceColor && type == other.type;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = pieceColor.hashCode();
+        result = 31 * result + type.hashCode();
+        return result;
+    }
 }
