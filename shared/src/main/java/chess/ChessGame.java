@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -14,7 +15,9 @@ public class ChessGame {
     private ChessBoard board = new ChessBoard();
     private TeamColor teamTurn = TeamColor.WHITE;
 
-    public ChessGame() {}
+    public ChessGame() {
+        board.resetBoard();
+    }
 
     /**
      * @return Which team's turn it is
@@ -260,5 +263,21 @@ public class ChessGame {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ChessGame other)) {
+            return false;
+        }
+        return teamTurn == other.teamTurn && Objects.equals(board, other.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, teamTurn);
     }
 }
