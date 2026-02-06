@@ -309,6 +309,25 @@ public class ChessGame {
         return null;
     }
 
+    private boolean isWhiteRookAt(int row, int col) {
+        ChessPiece p = board.getPiece(new ChessPosition(row, col));
+        return p != null && p.getTeamColor() == TeamColor.WHITE && p.getPieceType() == ChessPiece.PieceType.ROOK;
+    }
+
+    private boolean isBlackRookAt(int row, int col) {
+        ChessPiece p = board.getPiece(new ChessPosition(row, col));
+        return p != null && p.getTeamColor() == TeamColor.BlACK && p.getPieceType() == ChessPiece.PieceType.ROOK;
+    }
+
+    private boolean isSquareSafe(TeamColor color, ChessPosition kingSquare) {
+        ChessBoard copy = copyBoard(board);
+        ChessPosition from = (color == TeamColor.WHITE) ? new ChessPosition(1, 5) : new ChessPosition(8, 5);
+        ChessPiece king = copy.getPiece(from);
+        copy.addPiece(from, null);
+        copy.addPiece(kingSquare, king);
+        return !isInCheck(copy, color);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
