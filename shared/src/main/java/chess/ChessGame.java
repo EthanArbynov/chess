@@ -348,7 +348,7 @@ public class ChessGame {
     }
 
     private boolean isBlackRookAt(int col) {
-        ChessPiece p = board.getPiece(new ChessPosition(1, col));
+        ChessPiece p = board.getPiece(new ChessPosition(8, col));
         return p != null && p.getTeamColor() == TeamColor.BLACK && p.getPieceType() == ChessPiece.PieceType.ROOK;
     }
 
