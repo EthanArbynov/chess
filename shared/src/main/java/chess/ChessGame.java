@@ -14,12 +14,17 @@ public class ChessGame {
 
     private ChessBoard board = new ChessBoard();
     private TeamColor teamTurn = TeamColor.WHITE;
+
     private boolean whiteKingMoved = false;
     private boolean blackKingMoved = false;
     private boolean whiteLeftRookMoved = false;
     private boolean whiteRightRookMoved = false;
     private boolean blackLeftRookMoved = false;
     private boolean blackRightRookMoved = false;
+
+    private ChessPosition enPassantSquare = null;
+    private ChessPosition enPassantPawnPos = null;
+    private TeamColor enPassantPawnColor = null;
 
     public ChessGame() {
         board.resetBoard();
@@ -110,6 +115,11 @@ public class ChessGame {
                 }
             }
         }
+
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            addEnPassantMoves(startPosition, piece.getTeamColor(), legal);
+        }
+
         return legal;
     }
 
@@ -393,6 +403,38 @@ public class ChessGame {
                     blackRightRookMoved = true;
                 }
             }
+        }
+    }
+
+    private void addEnPassantMoves(ChessPosition from, TeamColor myColor, Collection<ChessMove> legal) {
+        if (enPassantSquare == null) return;
+        if (enPassantPawnColor == null) return;
+        if (enPassantPawnPos == null) return;
+        if (myColor == enPassantPawnColor) return;
+
+        int dir = (myColor == TeamColor.WHITE) ? 1 : -1;
+        int fromRow = from.getRow();
+        int fromCol = from.getColumn();
+        int toRow = enPassantSquare.getRow();
+        int toCol = enPassantSquare.getColumn();
+
+        if (toRow != fromRow + dir) return;
+        if (Math.abs(toCol - fromCol) != 1) return;
+        if (board.getPiece(enPassantSquare) != null) return;
+
+        ChessPiece victim = board.getPiece(enPassantPawnPos);
+        if (victim == null) return;
+        if (victim.getPieceType() != ChessPiece.PieceType.PAWN) return;
+        if (victim.getTeamColor() != enPassantPawnColor) return;
+        if (enPassantPawnPos.getRow() != fromRow) return;
+        if (enPassantPawnPos.getColumn() - fromCol != 1) return;
+
+        ChessPiece epMove = new ChessMove(from, enPassantSquare, null);
+        ChessBoard copy = copyBoard(board);
+        applyMove(copy, epMove);
+
+        if(isInCheck(copy, myColor)) {
+            legal.add(epMove);
         }
     }
 
