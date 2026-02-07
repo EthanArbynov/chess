@@ -199,8 +199,7 @@ public class ChessPiece {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ChessPiece)) return false;
-        ChessPiece other = (ChessPiece) o;
+        if (!(o instanceof ChessPiece other)) return false;
 
         return pieceColor == other.pieceColor && type == other.type;
     }

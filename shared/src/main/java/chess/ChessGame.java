@@ -86,13 +86,13 @@ public class ChessGame {
                 if (!whiteKingMoved && !isInCheck(TeamColor.WHITE)) {
                     if (!whiteRightRookMoved && board.getPiece(new ChessPosition(1, 6)) == null &&
                             board.getPiece(new ChessPosition(1, 7)) == null && isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 6)) &&
-                    isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 7)) && isWhiteRookAt(1, 8)) {
+                    isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 7)) && isWhiteRookAt(8)) {
                         legal.add(new ChessMove(new ChessPosition(1, 5), new ChessPosition(1, 7), null));
                     }
 
                     if (!whiteLeftRookMoved && board.getPiece(new ChessPosition(1, 4)) == null &&
                             board.getPiece(new ChessPosition(1, 3)) == null && board.getPiece(new ChessPosition(1, 2)) == null && isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 4)) &&
-                            isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 3)) && isWhiteRookAt(1, 1)) {
+                            isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 3)) && isWhiteRookAt(1)) {
                         legal.add(new ChessMove(new ChessPosition(1, 5), new ChessPosition(1, 3), null));
                     }
                 }
@@ -102,14 +102,14 @@ public class ChessGame {
                 if (!blackKingMoved && !isInCheck(TeamColor.BLACK)) {
                     if (!blackRightRookMoved && board.getPiece(new ChessPosition(8, 6)) == null &&
                             board.getPiece(new ChessPosition(8, 7)) == null && isSquareSafe(TeamColor.BLACK, new ChessPosition(8, 6)) &&
-                            isSquareSafe(TeamColor.BLACK, new ChessPosition(8, 7)) && isBlackRookAt(8, 8)) {
+                            isSquareSafe(TeamColor.BLACK, new ChessPosition(8, 7)) && isBlackRookAt(8)) {
                         legal.add(new ChessMove(new ChessPosition(8, 5), new ChessPosition(8, 7), null));
                     }
 
                     if (!blackLeftRookMoved && board.getPiece(new ChessPosition(8, 4)) == null &&
                             board.getPiece(new ChessPosition(8, 3)) == null && board.getPiece(new ChessPosition(8, 2)) == null &&
                             isSquareSafe(TeamColor.BLACK, new ChessPosition(8, 4)) &&
-                            isSquareSafe(TeamColor.BLACK, new ChessPosition(8, 3)) && isBlackRookAt(8, 1)) {
+                            isSquareSafe(TeamColor.BLACK, new ChessPosition(8, 3)) && isBlackRookAt(1)) {
                         legal.add(new ChessMove(new ChessPosition(8, 5), new ChessPosition(8, 3), null));
                     }
                 }
@@ -176,7 +176,7 @@ public class ChessGame {
         if (!isInCheck(teamColor)) {
             return false;
         }
-        return !hasAnyLegalMove(teamColor);
+        return hasNoLegalMoves(teamColor);
     }
 
     /**
@@ -190,7 +190,7 @@ public class ChessGame {
         if (isInCheck(teamColor)) {
             return false;
         }
-        return !hasAnyLegalMove(teamColor);
+        return hasNoLegalMoves(teamColor);
     }
 
     /**
@@ -243,7 +243,7 @@ public class ChessGame {
         b.addPiece(end, moving);
 
         ChessPiece.PieceType promo = move.getPromotionPiece();
-        if (promo != null) {
+        if (promo !=null  && moving != null) {
             b.addPiece(end, new ChessPiece(moving.getTeamColor(), promo));
         }
 
@@ -282,7 +282,7 @@ public class ChessGame {
         }
     }
 
-    private boolean hasAnyLegalMove(TeamColor teamColor) {
+    private boolean hasNoLegalMoves(TeamColor teamColor) {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition pos = new ChessPosition(i, j);
@@ -291,12 +291,12 @@ public class ChessGame {
                 if (p != null && p.getTeamColor() == teamColor) {
                     Collection<ChessMove> moves = validMoves(pos);
                     if (moves != null && !moves.isEmpty()) {
-                        return true;
+                        return false;
                     }
                 }
             }
         }
-        return false;
+        return true;
     }
 
     private boolean isInCheck(ChessBoard b, TeamColor teamColor) {
@@ -342,13 +342,13 @@ public class ChessGame {
         return null;
     }
 
-    private boolean isWhiteRookAt(int row, int col) {
-        ChessPiece p = board.getPiece(new ChessPosition(row, col));
+    private boolean isWhiteRookAt(int col) {
+        ChessPiece p = board.getPiece(new ChessPosition(1, col));
         return p != null && p.getTeamColor() == TeamColor.WHITE && p.getPieceType() == ChessPiece.PieceType.ROOK;
     }
 
-    private boolean isBlackRookAt(int row, int col) {
-        ChessPiece p = board.getPiece(new ChessPosition(row, col));
+    private boolean isBlackRookAt(int col) {
+        ChessPiece p = board.getPiece(new ChessPosition(1, col));
         return p != null && p.getTeamColor() == TeamColor.BLACK && p.getPieceType() == ChessPiece.PieceType.ROOK;
     }
 
