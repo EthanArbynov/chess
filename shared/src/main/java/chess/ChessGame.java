@@ -151,8 +151,8 @@ public class ChessGame {
         }
 
         updateCastleFlags(move, piece);
-        updateEnPassantState(move, piece);
         applyMove(board, move);
+        updateEnPassantState(move, piece);
         teamTurn = opposite(teamTurn);
     }
 
@@ -349,7 +349,7 @@ public class ChessGame {
 
     private boolean isBlackRookAt(int row, int col) {
         ChessPiece p = board.getPiece(new ChessPosition(row, col));
-        return p != null && p.getTeamColor() == TeamColor.BlACK && p.getPieceType() == ChessPiece.PieceType.ROOK;
+        return p != null && p.getTeamColor() == TeamColor.BLACK && p.getPieceType() == ChessPiece.PieceType.ROOK;
     }
 
     private boolean isSquareSafe(TeamColor color, ChessPosition kingSquare) {
@@ -367,7 +367,7 @@ public class ChessGame {
 
         if (moving.getPieceType() == ChessPiece.PieceType.KING) {
             if (moving.getTeamColor() == TeamColor.WHITE) {
-                whiteKingMoved == true;
+                whiteKingMoved = true;
             }
             else {
                 blackKingMoved = true;
@@ -434,13 +434,13 @@ public class ChessGame {
         if (victim.getPieceType() != ChessPiece.PieceType.PAWN) return;
         if (victim.getTeamColor() != enPassantPawnColor) return;
         if (enPassantPawnPos.getRow() != fromRow) return;
-        if (enPassantPawnPos.getColumn() - fromCol != 1) return;
+        if (Math.abs(enPassantPawnPos.getColumn() - fromCol) != 1) return;
 
-        ChessPiece epMove = new ChessMove(from, enPassantSquare, null);
+        ChessMove epMove = new ChessMove(from, enPassantSquare, null);
         ChessBoard copy = copyBoard(board);
         applyMove(copy, epMove);
 
-        if (isInCheck(copy, myColor)) {
+        if (!isInCheck(copy, myColor)) {
             legal.add(epMove);
         }
     }
