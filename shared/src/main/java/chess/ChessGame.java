@@ -151,6 +151,7 @@ public class ChessGame {
         }
 
         updateCastleFlags(move, piece);
+        updateEnPassantState(move, piece);
         applyMove(board, move);
         teamTurn = opposite(teamTurn);
     }
@@ -231,6 +232,12 @@ public class ChessGame {
         ChessPosition end = move.getEndPosition();
 
         ChessPiece moving = b.getPiece(start);
+
+        if (moving != null && moving.getPieceType() == ChessPiece.PieceType.PAWN && start.getColumn() != end.getColumn() &&
+            b.getPiece(end) == null && end.equals(enPassantSquare) && enPassantPawnPos != null) {
+                b.addPiece(enPassantPawnPos, null);
+            }
+
 
         b.addPiece(start, null);
         b.addPiece(end, moving);
@@ -433,9 +440,32 @@ public class ChessGame {
         ChessBoard copy = copyBoard(board);
         applyMove(copy, epMove);
 
-        if(isInCheck(copy, myColor)) {
+        if (isInCheck(copy, myColor)) {
             legal.add(epMove);
         }
+    }
+
+    private void updateEnPassantState(ChessMove move, ChessPiece moving) {
+        enPassantSquare = null;
+        enPassantPawnPos = null;
+        enPassantPawnColor = null;
+
+        if (moving.getPieceType() != ChessPiece.PieceType.PAWN) return;
+
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+
+        if (start.getColumn() != end.getColumn()) return;
+
+        int dr = end.getRow() - start.getRow();
+        if (Math.abs(dr) != 2) return;
+
+        int midRow = (start.getRow() + end.getRow()) /2;
+        int col = start.getColumn();
+
+        enPassantSquare = new ChessPosition(midRow, col);
+        enPassantPawnPos = end;
+        enPassantPawnColor = moving.getTeamColor();
     }
 
     @Override
