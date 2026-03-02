@@ -97,4 +97,32 @@ public class UserHandler {
             ctx.json(resp);
         }
     }
+
+    public void logout(context ctx) {
+        try {
+            String token = ctx.header("authorization");
+            userService.logout(token);
+            ctx.status(200);
+            ctx.result("{}");
+        } catch (DataAccessException e) {
+            String msg = e.getMessage();
+            Map<String, String> resp = new HashMap<>();
+
+            if (msg.equals("unauthorized")) {
+                resp.put("message", "Error: unauthorized");
+                ctx.status(401);
+                ctx.json(resp);
+                return;
+            }
+
+            resp.put("message", "Error: " + msg);
+            ctx.status(500);
+            ctx.json(resp);
+        } catch(Exception e) {
+            Map<String, String> resp = new HashMap<>();
+            resp.put("message", "Error: " + e.getMessage());
+            ctx.status(500);
+            ctx.json(resp);
+        }
+    }
 }

@@ -50,4 +50,16 @@ public class UserService {
         dao.createAuth(new AuthData(token, username));
         return new AuthResult(username, token);
     }
+
+    public void logout(String authToken) throws DataAccessException {
+        if (authToken == null || authToken.isEmpty()) {
+            throw new DataAccessException("unauthorized");
+        }
+
+        if (dao.getAuth(authToken) == null) {
+            throw new DataAccessException("unauthorized");
+        }
+
+        dao.deleteAuth(authtoken);
+    }
 }
