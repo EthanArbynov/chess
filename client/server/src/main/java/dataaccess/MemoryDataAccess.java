@@ -20,4 +20,27 @@ public class MemoryDataAccess implements DataAccess {
         games.clear();
         nextGameId = 1;
     }
+
+    @Override
+    public void createUser(Userdata user) throws DataAccessException {
+        if (username.containsKey(user.username())) {
+            throw new DataAccessException("already taken");
+        }
+        users.put(user.username(), user);
+    }
+
+    @Override
+    public UserDara getUser(String Username) {
+        return users.get(username);
+    }
+
+    @Override
+    public void createAuth(AuthData auth) {
+        authTokens.put(auth.authToken(), auth);
+    }
+
+    @Override
+    public AuthData getAuth(String authToken) {
+        return authTokens.get(authToken);
+    }
 }

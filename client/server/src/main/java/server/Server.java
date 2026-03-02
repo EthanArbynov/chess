@@ -3,8 +3,10 @@ package server;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import handler.ClearHandler;
+import handler.UserHandler;
 import io.javalin.*;
 import service.ClearService;
+import service.UserService;
 
 public class Server {
 
@@ -18,7 +20,11 @@ public class Server {
         ClearService clearService = new ClearService(dao);
         ClearHandler clearHandler = new ClearHandler(clearService);
 
+        UserService userService = new UserService(dao);
+        UserHandler userHandler = new UserHandler(userService);
+
         javalin.delete("/db", clearHandler::clear);
+        javalin.post("/user", userHandler::register);
     }
 
     public int run(int desiredPort) {
