@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import handler.AuthResult;
 import model.AuthData;
 import model.UserData;
 
@@ -32,5 +33,21 @@ public class UserService {
         String token = UUID.randomUUID().toString();
         dao.createAuth(new AuthData(token, user.username()));
         return new RegisterResult(user.username(), token);
+    }
+
+    public AuthResult login(String username, String password) throws DataAccessException{
+        if (username == null || password == null) {
+            throw new DataAccessException("bad request");
+        }
+        UserData user = dao.getUser(username);
+        if (user == null) {
+            throw new DataAccessException("unauthorized");
+        }
+        if (!user.password().equals(password)) {
+            throw new DataAccessException("unauthorized");
+        }
+        String token = UUID.randomUUID().toString();
+        dao.createAuth(new AuthData(token, username));
+        return new AuthResult(username, token);
     }
 }

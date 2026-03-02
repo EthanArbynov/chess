@@ -53,4 +53,48 @@ public class UserHandler {
             ctx.json(resp);
         }
     }
+
+    public void login(Context ctx) {
+        try {
+            LoginRequest req = gson.fromJson(ctx.body(), LoginRequest.class);
+
+            if (req == null) {
+                Map<String, String> resp = new HashMap<>();
+                resp.put("message", "Error: bad request");
+                ctx.status(400);
+                ctx.json(resp);
+                return;
+            }
+
+            AuthResult result = userService.login(req.username, req.password);
+            ctx.status(200);
+            ctx.json(result);
+        } catch (DataAccessException e) {
+            String msg = e.getMessage();
+            Map<String, String> resp = new HashMap<>();
+
+            if (msg.equals("bad request")) {
+                resp.put("message", "Error: bad request");
+                ctx.status(400);
+                ctx.json(resp);
+                return;
+            }
+
+            if (msg.equals("unauthorized")) {
+                resp.put("message", "Error: unauthorized");
+                ctx.status(401);
+                ctx.json(resp);
+                return;
+            }
+
+            resp.put("message", "Error: " + msg);
+            ctx.status(500);
+            ctx.json(resp);
+        } catch(Exception e) {
+            Map<String, String> resp = new HashMap<>();
+            resp.put("message", "Error: " + e.getMessage());
+            ctx.status(500);
+            ctx.json(resp);
+        }
+    }
 }
