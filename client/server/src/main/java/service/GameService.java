@@ -17,7 +17,7 @@ public class GameService {
         this.dao = dao;
     }
 
-    public Collection<GameData> listGames(string authToken) throws DataAccessException {
+    public Collection<GameData> listGames(String authToken) throws DataAccessException {
     if (authToken == null || authToken.isEmpty()) {
         throw new DataAccessException("unauthorized");
     }
@@ -48,7 +48,7 @@ public class GameService {
         return id;
     }
 
-    public void JoinGame(String authToken, Integer gameID, String playerColor) throws DataAccessException {
+    public void joinGame(String authToken, Integer gameID, String playerColor) throws DataAccessException {
         if (authToken == null || authToken.isEmpty()) {
             throw new DataAccessException("unauthorized");
         }
@@ -66,6 +66,10 @@ public class GameService {
             throw new DataAccessException("bad request");
         }
 
+        if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
+            throw new DataAccessException("bad request");
+        }
+
         GameData game = dao.getGame(gameID);
         if (game == null) {
             throw new DataAccessException("bad request");
@@ -74,7 +78,7 @@ public class GameService {
         String username = auth.username();
         if (playerColor.equals("WHITE")) {
             if (game.whiteUsername() != null && !game.whiteUsername().equals(username)) {
-                throw new DataAccessException("already taken");
+                throw new DataAccessException("forbidden");
             }
 
             GameData updated = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
@@ -83,10 +87,10 @@ public class GameService {
         }
 
         if (game.blackUsername() != null && !game.blackUsername().equals(username)) {
-            throw new DataAccessException("already taken");
+            throw new DataAccessException("forbidden");
         }
 
-        GameData updated = new GameData(game.gameID(), username, game.whiteUsername(), game.gameName(), game.game());
+        GameData updated = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
         dao.updateGame(updated);
     }
 }

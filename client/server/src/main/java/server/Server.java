@@ -6,6 +6,8 @@ import handler.ClearHandler;
 import handler.GameHandler;
 import handler.UserHandler;
 import io.javalin.*;
+import io.javalin.http.staticfiles.Location;
+import io.javalin.json.JavalinGson;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -15,7 +17,14 @@ public class Server {
     private final Javalin javalin;
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        javalin = Javalin.create(config -> {
+            config.staticFiles.add(staticFiles -> {
+                staticFiles.hostedPath = "/";
+                staticFiles.directory = "/web";
+                staticFiles.location = Location.CLASSPATH;
+            });
+            config.jsonMapper(new JavalinGson());
+        });
 
         DataAccess dao = new MemoryDataAccess();
 

@@ -10,7 +10,7 @@ public class ClearService {
         this.dao = dao;
     }
 
-    public void clear() throws DataAccessException; {
+    public void clear() throws DataAccessException {
         dao.clear();
     }
 }

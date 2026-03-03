@@ -60,6 +60,6 @@ public class UserService {
             throw new DataAccessException("unauthorized");
         }
 
-        dao.deleteAuth(authtoken);
+        dao.deleteAuth(authToken);
     }
 }

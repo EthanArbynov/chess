@@ -88,11 +88,11 @@ public class GameHandler {
                 ctx.json(resp);
                 return;
             }
-            resp.put("message:", "Error: " + msg);
+            resp.put("message", "Error: " + msg);
             ctx.status(500);
             ctx.json(resp);
         } catch (Exception e) {
-            Map<String, String> resp = new Hashmap<>();
+            Map<String, String> resp = new HashMap<>();
             resp.put("message", "Error: " + e.getMessage());
             ctx.status(500);
             ctx.json(resp);
@@ -132,19 +132,14 @@ public class GameHandler {
                 return;
             }
 
-            if (msg.equals("already taken")) {
-                resp.put("message", "Error: already taken");
+            if (msg.equals("forbidden")) {
+                resp.put("message", "Error: forbidden");
                 ctx.status(403);
                 ctx.json(resp);
                 return;
             }
 
             resp.put("message", "Error: " + msg);
-            ctx.status(500);
-            ctx.json(resp);
-        } catch (DataAccessException e) {
-            Map<String, String> resp = new HashMap<>();
-            resp.put("message", "Error: " + e.getMessage());
             ctx.status(500);
             ctx.json(resp);
         }

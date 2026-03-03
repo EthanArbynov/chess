@@ -23,15 +23,15 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void createUser(Userdata user) throws DataAccessException {
-        if (username.containsKey(user.username())) {
+    public void createUser(UserData user) throws DataAccessException {
+        if (users.containsKey(user.username())) {
             throw new DataAccessException("already taken");
         }
         users.put(user.username(), user);
     }
 
     @Override
-    public UserDara getUser(String Username) {
+    public UserData getUser(String username) {
         return users.get(username);
     }
 
@@ -47,7 +47,7 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void deleteAuth(String authToken) {
-        authtokens.remove(authToken);
+        authTokens.remove(authToken);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class MemoryDataAccess implements DataAccess {
         int id = nextGameId;
         nextGameId++;
 
-        chess.chessGame game = new chess.chessGame();
+        chess.ChessGame game = new chess.ChessGame();
 
         GameData gameData = new GameData(id, null, null, gameName, game);
         games.put(id, gameData);
