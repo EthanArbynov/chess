@@ -75,7 +75,9 @@ public class ChessBoard {
             return true;
         }
 
-        if (!(other instanceof ChessBoard otherBoard)) return false;
+        if (!(other instanceof ChessBoard otherBoard)) {
+            return false;
+        }
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
