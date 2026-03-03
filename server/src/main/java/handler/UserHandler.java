@@ -35,8 +35,8 @@ public class UserHandler {
                 return;
             }
 
-            if (msg.equals("already taken")) {
-                resp.put("message", "Error: already taken");
+            if (msg.equals("forbidden") || msg.equals("already taken")) {
+                resp.put("message", "Error: forbidden");
                 ctx.status(403);
                 ctx.json(resp);
                 return;
@@ -98,7 +98,7 @@ public class UserHandler {
         }
     }
 
-    public void logout(context ctx) {
+    public void logout(Context ctx) {
         try {
             String token = ctx.header("authorization");
             userService.logout(token);
