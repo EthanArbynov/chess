@@ -54,4 +54,29 @@ public class MemoryDataAccess implements DataAccess {
     public Collection<GameData> listGames() {
         return games.values();
     }
+
+    @Override
+    public int createGame(String gameName) {
+        int id = nextGameId;
+        nextGameId++;
+
+        chess.chessGame game = new chess.chessGame();
+
+        GameData gameData = new GameData(id, null, null, gameName, game);
+        games.put(id, gameData);
+        return id;
+    }
+
+    @Override
+    public GameData getGame(int gameID) {
+        return games.get(gameID);
+    }
+
+    @Override
+    public void updateGame(GameData game) throws DataAccessException {
+        if (!games.containsKey(game.gameID())) {
+            throw new DataAccessException("game not found");
+        }
+        games.put(game.gameID(), game);
+    }
 }

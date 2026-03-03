@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
+
 public class GameHandler {
     private final GameService gameService;
+    private final Gson gson = new Gson();
 
     public GameHandler(GameService gameService) {
         this.gameService = gameService;
@@ -46,6 +49,50 @@ public class GameHandler {
             ctx.json(resp);
         } catch (Exception e) {
             Map<String, String> resp = new HashMap<>();
+            resp.put("message", "Error: " + e.getMessage());
+            ctx.status(500);
+            ctx.json(resp);
+        }
+    }
+
+    public void createGame(Context ctx) {
+        try {
+            String token = ctx.header("authorization");
+
+            CreateGameRequest req = gson.fromJson(ctx.body(), CreateGameRequest.class);
+            if (req == null || req.gameName == null || req.gameName.isEmpty()) {
+                Map<String, String> resp = new HashMap<>();
+                resp.put("message", "Error: bad request");
+                ctx.status(400);
+                ctx.json(resp);
+                return;
+            }
+            int id = gameService.createGame(token, req.gameName);
+
+            ctx.status(200);
+            ctx.json(new CreateGameResult(id));
+        } catch (DataAccessException e) {
+            Map<String, String> resp = new HashMap<>();
+            String msg = e.getMessage();
+
+            if (msg.equals("unauthorized")) {
+                resp.put("message", "Error: unauthorized");
+                ctx.status(401);
+                ctx.json(resp);
+                return;
+            }
+
+            if (msg.equals("bad request")) {
+                resp.put("message", "Error: bad request");
+                ctx.status(400);
+                ctx.json(resp);
+                return;
+            }
+            resp.put("message:", "Error: " + msg);
+            ctx.status(500);
+            ctx.json(resp);
+        } catch (Exception e) {
+            Map<String, String> resp = new Hashmap<>();
             resp.put("message", "Error: " + e.getMessage());
             ctx.status(500);
             ctx.json(resp);
