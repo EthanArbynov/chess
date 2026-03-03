@@ -48,4 +48,45 @@ public class GameService {
         return id;
     }
 
+    public void JoinGame(String authToken, Integer gameID, String playerColor) throws DataAccessException {
+        if (authToken == null || authToken.isEmpty()) {
+            throw new DataAccessException("unauthorized");
+        }
+
+        AuthData auth = dao.getAuth(authToken);
+        if (auth == null) {
+            throw new DataAccessException("unauthorized");
+        }
+
+        if (gameID == null) {
+            throw new DataAccessException("bad request");
+        }
+
+        if (playerColor == null) {
+            throw new DataAccessException("bad request");
+        }
+
+        GameData game = dao.getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("bad request");
+        }
+
+        String username = auth.username();
+        if (playerColor.equals("WHITE")) {
+            if (game.whiteUsername() != null && !game.whiteUsername().equals(username)) {
+                throw new DataAccessException("already taken");
+            }
+
+            GameData updated = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
+            dao.updateGame(updated);
+            return;
+        }
+
+        if (game.blackUsername() != null && !game.blackUsername().equals(username)) {
+            throw new DataAccessException("already taken");
+        }
+
+        GameData updated = new GameData(game.gameID(), username, game.whiteUsername(), game.gameName(), game.game());
+        dao.updateGame(updated);
+    }
 }

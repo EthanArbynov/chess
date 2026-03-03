@@ -98,4 +98,55 @@ public class GameHandler {
             ctx.json(resp);
         }
     }
+
+    public void joinGame(Context ctx) {
+        try {
+            String token = ctx.header("authorization");
+            JoinGameRequest req = gson.fromJson(ctx.body(), JoinGameRequest.class);
+
+            if (req == null || req.gameID == null || req.playerColor == null) {
+                Map<String, String> resp = new HashMap<>();
+                resp.put("message", "Error: bad request");
+                ctx.status(400);
+                ctx.json(resp);
+                return;
+            }
+            gameService.joinGame(token, req.gameID, req.playerColor);
+            ctx.status(200);
+            ctx.result("{}");
+        } catch (DataAccessException e) {
+            String msg = e.getMessage();
+            Map<String, String> resp = new HashMap<>();
+
+            if (msg.equals("unauthorized")) {
+                resp.put("message", "Error: unauthorized");
+                ctx.status(401);
+                ctx.json(resp);
+                return;
+            }
+
+            if (msg.equals("bad request")) {
+                resp.put("message", "Error: bad request");
+                ctx.status(400);
+                ctx.json(resp);
+                return;
+            }
+
+            if (msg.equals("already taken")) {
+                resp.put("message", "Error: already taken");
+                ctx.status(403);
+                ctx.json(resp);
+                return;
+            }
+
+            resp.put("message", "Error: " + msg);
+            ctx.status(500);
+            ctx.json(resp);
+        } catch (DataAccessException e) {
+            Map<String, String> resp = new HashMap<>();
+            resp.put("message", "Error: " + e.getMessage());
+            ctx.status(500);
+            ctx.json(resp);
+        }
+    }
 }
