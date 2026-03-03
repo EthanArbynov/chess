@@ -25,7 +25,7 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public void createUser(UserData user) throws DataAccessException {
         if (users.containsKey(user.username())) {
-            throw new DataAccessException("already taken");
+            throw new DataAccessException("forbidden");
         }
         users.put(user.username(), user);
     }
