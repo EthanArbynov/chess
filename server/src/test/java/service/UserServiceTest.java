@@ -13,7 +13,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void register_positive_returnsAuthTokenAndUsername() throws Exception {
+    void registerPositiveReturnsAuthTokenAndUsername() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
 
@@ -26,7 +26,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void register_negative_duplicateUsername_throwsForbidden() throws Exception {
+    void registerNegativeDuplicateUsernameThrowsForbidden() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
 
@@ -39,7 +39,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void login_positive_returnsAuthTokenAndUsername() throws Exception {
+    void loginPositiveReturnsAuthTokenAndUsername() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
 
@@ -53,7 +53,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void login_negative_wrongPassword_throwsUnauthorized() throws Exception {
+    void loginNegativeWrongPasswordThrowsUnauthorized() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
 
@@ -66,7 +66,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void logout_positive_invalidatesToken() throws Exception {
+    void logoutPositiveInvalidatesToken() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
 
@@ -81,7 +81,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void logout_negative_nullToken_throwsUnauthorized() throws Exception {
+    void logoutNegativeNullTokenThrowsUnauthorized() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
 

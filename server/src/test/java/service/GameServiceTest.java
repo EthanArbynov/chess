@@ -17,7 +17,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void listGames_positive_returnsCollection() throws Exception {
+    void listGamesPositiveReturnsCollection() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
         var gameService = new GameService(dao);
@@ -32,7 +32,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void listGames_negative_nullToken_throwsUnauthorized() throws Exception {
+    void listGamesNegativeNullTokenThrowsUnauthorized() throws Exception {
         var dao = makeDao();
         var gameService = new GameService(dao);
 
@@ -41,7 +41,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void createGame_positive_returnsGameId() throws Exception {
+    void createGamePositiveReturnsGameId() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
         var gameService = new GameService(dao);
@@ -56,7 +56,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void createGame_negative_blankName_throwsBadRequest() throws Exception {
+    void createGameNegativeBlankNameThrowsBadRequest() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
         var gameService = new GameService(dao);
@@ -68,7 +68,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void joinGame_positive_setsWhitePlayer() throws Exception {
+    void joinGamePositiveSetsWhitePlayer() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
         var gameService = new GameService(dao);
@@ -82,7 +82,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void joinGame_negative_badColor_throwsBadRequest() throws Exception {
+    void joinGameNegativeBadColorThrowsBadRequest() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
         var gameService = new GameService(dao);
@@ -97,7 +97,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void joinGame_negative_stealColor_throwsForbidden() throws Exception {
+    void joinGameNegativeStealColorThrowsForbidden() throws Exception {
         var dao = makeDao();
         var userService = new UserService(dao);
         var gameService = new GameService(dao);

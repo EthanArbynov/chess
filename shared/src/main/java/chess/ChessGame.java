@@ -91,7 +91,9 @@ public class ChessGame {
                     }
 
                     if (!whiteLeftRookMoved && board.getPiece(new ChessPosition(1, 4)) == null &&
-                            board.getPiece(new ChessPosition(1, 3)) == null && board.getPiece(new ChessPosition(1, 2)) == null && isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 4)) &&
+                            board.getPiece(new ChessPosition(1, 3)) == null &&
+                            board.getPiece(new ChessPosition(1, 2)) == null &&
+                            isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 4)) &&
                             isSquareSafe(TeamColor.WHITE, new ChessPosition(1, 3)) && isWhiteRookAt(1)) {
                         legal.add(new ChessMove(new ChessPosition(1, 5), new ChessPosition(1, 3), null));
                     }
@@ -414,10 +416,18 @@ public class ChessGame {
     }
 
     private void addEnPassantMoves(ChessPosition from, TeamColor myColor, Collection<ChessMove> legal) {
-        if (enPassantSquare == null) return;
-        if (enPassantPawnColor == null) return;
-        if (enPassantPawnPos == null) return;
-        if (myColor == enPassantPawnColor) return;
+        if (enPassantSquare == null) {
+            return;
+        }
+        if (enPassantPawnColor == null) {
+            return;
+        }
+        if (enPassantPawnPos == null) {
+            return;
+        }
+        if (myColor == enPassantPawnColor) {
+            return;
+        }
 
         int dir = (myColor == TeamColor.WHITE) ? 1 : -1;
         int fromRow = from.getRow();
@@ -425,16 +435,32 @@ public class ChessGame {
         int toRow = enPassantSquare.getRow();
         int toCol = enPassantSquare.getColumn();
 
-        if (toRow != fromRow + dir) return;
-        if (Math.abs(toCol - fromCol) != 1) return;
-        if (board.getPiece(enPassantSquare) != null) return;
+        if (toRow != fromRow + dir) {
+            return;
+        }
+        if (Math.abs(toCol - fromCol) != 1) {
+            return;
+        }
+        if (board.getPiece(enPassantSquare) != null) {
+            return;
+        }
 
         ChessPiece victim = board.getPiece(enPassantPawnPos);
-        if (victim == null) return;
-        if (victim.getPieceType() != ChessPiece.PieceType.PAWN) return;
-        if (victim.getTeamColor() != enPassantPawnColor) return;
-        if (enPassantPawnPos.getRow() != fromRow) return;
-        if (Math.abs(enPassantPawnPos.getColumn() - fromCol) != 1) return;
+        if (victim == null) {
+            return;
+        }
+        if (victim.getPieceType() != ChessPiece.PieceType.PAWN) {
+            return;
+        }
+        if (victim.getTeamColor() != enPassantPawnColor) {
+            return;
+        }
+        if (enPassantPawnPos.getRow() != fromRow) {
+            return;
+        }
+        if (Math.abs(enPassantPawnPos.getColumn() - fromCol) != 1) {
+            return;
+        }
 
         ChessMove epMove = new ChessMove(from, enPassantSquare, null);
         ChessBoard copy = copyBoard(board);
@@ -450,15 +476,21 @@ public class ChessGame {
         enPassantPawnPos = null;
         enPassantPawnColor = null;
 
-        if (moving.getPieceType() != ChessPiece.PieceType.PAWN) return;
+        if (moving.getPieceType() != ChessPiece.PieceType.PAWN) {
+            return;
+        }
 
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
 
-        if (start.getColumn() != end.getColumn()) return;
+        if (start.getColumn() != end.getColumn()) {
+            return;
+        }
 
         int dr = end.getRow() - start.getRow();
-        if (Math.abs(dr) != 2) return;
+        if (Math.abs(dr) != 2) {
+            return;
+        }
 
         int midRow = (start.getRow() + end.getRow()) /2;
         int col = start.getColumn();
