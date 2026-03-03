@@ -54,4 +54,64 @@ public class GameServiceTest {
         assertNotNull(dao.getGame(gameId));
         assertEquals("My Game", dao.getGame(gameId).gameName());
     }
+
+    @Test
+    void createGame_negative_blankName_throwsBadRequest() throws Exception {
+        var dao = makeDao();
+        var userService = new UserService(dao);
+        var gameService = new GameService(dao);
+
+        String token = registerAndGetToken(userService, "alice");
+
+        var ex = assertThrows(DataAccessException.class, () -> gameService.createGame(token, ""));
+        assertEquals("bad request", ex.getMessage());
+    }
+
+    @Test
+    void joinGame_positive_setsWhitePlayer() throws Exception {
+        var dao = makeDao();
+        var userService = new UserService(dao);
+        var gameService = new GameService(dao);
+
+        String token = registerAndGetToken(userService, "alice");
+        int gameId = gameService.createGame(token, "G");
+
+        gameService.joinGame(token, gameId, "WHITE");
+
+        assertEquals("alice", dao.getGame(gameId).whiteUsername());
+    }
+
+    @Test
+    void joinGame_negative_badColor_throwsBadRequest() throws Exception {
+        var dao = makeDao();
+        var userService = new UserService(dao);
+        var gameService = new GameService(dao);
+
+        String token = registerAndGetToken(userService, "alice");
+        int gameId = gameService.createGame(token, "G");
+
+        var ex = assertThrows(DataAccessException.class,
+                () -> gameService.joinGame(token, gameId, "GREEN"));
+
+        assertEquals("bad request", ex.getMessage());
+    }
+
+    @Test
+    void joinGame_negative_stealColor_throwsForbidden() throws Exception {
+        var dao = makeDao();
+        var userService = new UserService(dao);
+        var gameService = new GameService(dao);
+
+        String tokenA = registerAndGetToken(userService, "alice");
+        String tokenB = registerAndGetToken(userService, "bob");
+
+        int gameId = gameService.createGame(tokenA, "G");
+
+        gameService.joinGame(tokenA, gameId, "WHITE");
+
+        var ex = assertThrows(DataAccessException.class,
+                () -> gameService.joinGame(tokenB, gameId, "WHITE"));
+
+        assertEquals("forbidden", ex.getMessage());
+    }
 }
