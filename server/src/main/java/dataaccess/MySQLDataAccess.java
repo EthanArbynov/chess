@@ -50,4 +50,35 @@ public class MySQLDataAccess implements DataAccess {
             throw new DataAccessException("forbidden", e);
         }
     }
+
+    @Override
+    public UserData getUser(String username) throws DataAccessException {
+        String sql = "SELECT username, password_hash, email FROM user WHERE username = ?";
+
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+
+            try(ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new UserData(rs.getString("username"), rs.getString("password_hash"), rs.getString("email"));
+                }
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new DataAccessException("Error getting user", e);
+        }
+    }
+
+    @Override
+    public void createAuth(AuthData auth) throws DataAccessException {
+        String sql = "INSERT INTO auth (auth_token, username) VALUES (?, ?)";
+
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, auth.authToken());
+            stmt.setString(2, auth.username());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error creating auth", e);
+        }
+    }
 }
