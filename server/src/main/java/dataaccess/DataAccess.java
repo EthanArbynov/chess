@@ -4,7 +4,6 @@ import model.AuthData;
 import model.UserData;
 import model.GameData;
 
-import javax.xml.crypto.Data;
 import java.util.Collection;
 
 public interface DataAccess {
