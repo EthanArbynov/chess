@@ -167,4 +167,51 @@ public class MySQLDataAccess implements DataAccess {
             throw new DataAccessException("Error creating game", e);
         }
     }
+
+    @Override
+    public GameData getGame(int gameID) throws DataAccessException{
+        String sql = "SELECT game_id, white_username, black_username, game_name, game_json FROM game WHERE game_id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, gameID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    ChessGame game = gson.fromJson(rs.getString("game_json"), ChessGame.class);
+
+                    return new GameData(
+                            rs.getInt("game_id"),
+                            rs.getString("white_username"),
+                            rs.getString("black_username"),
+                            rs.getString("game_name"), game
+                    );
+                }
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new DataAccessException("Error getting game", e);
+        }
+    }
+
+    @Override
+    public void updateGame(GameData game) throws DataAccessException {
+        String sql = " UPDATE game SET white_username = ?, black_username = ?, game_name = ?, game_json = ? WHERE game_id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, game.whiteUsername());
+            stmt.setString(2, game.blackUsername());
+            stmt.setString(3, game.gameName());
+            stmt.setString(4, gson.toJson(game.game()));
+            stmt.setInt(5, game.gameID());
+
+            int rowsChanged = stmt.executeUpdate();
+            if (rowsChanged == 0) {
+                throw new DataAccessException("game not found");
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error updating game", e);
+        }
+    }
 }
