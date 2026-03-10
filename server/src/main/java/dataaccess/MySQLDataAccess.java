@@ -9,6 +9,7 @@ import model.GameData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -79,6 +80,38 @@ public class MySQLDataAccess implements DataAccess {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Error creating auth", e);
+        }
+    }
+
+    @Override
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        String sql = "SELECT auth_token, username FROM auth WHERE auth_token = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, authToken);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new AuthData(rs.getString("auth_token"), rs.getString("username"));
+                }
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new DataAccessException("Error getting auth", e);
+        }
+    }
+
+    @Override
+    public void deleteAuth(String authToken) throws DataAccessException {
+        String sql = "DELETE FROM auth WHERE auth_token = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, authToken);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error deleting auth", e);
         }
     }
 }
