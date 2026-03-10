@@ -114,4 +114,57 @@ public class MySQLDataAccess implements DataAccess {
             throw new DataAccessException("Error deleting auth", e);
         }
     }
+
+    @Override
+    public Collection<GameData> listGames() throws DataAccessException {
+        String sql = "SELECT game_id, white_username, black_username, game_name, game_json, FROM game";
+        Collection<GameData> games = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ChessGame game = gson.fromJson(rs.getString("game_json"), ChessGame class);
+
+                GameData gameData = new GameData(
+                        rs.getInt("game_id"),
+                        rs.getString("white_username"),
+                        rs.getString("black_username"),
+                        rs.getString("game_name"), game
+                );
+                games.add(gameData);
+            }
+            return games;
+        } catch (SQLException e) {
+            throw new DataAccessException("Error listing games", e);
+        }
+    }
+
+    @Override
+    public int createGame(String gameName) throws DataAccessException {
+        String sql = "INSERT INTO game (white_username, black_username, game_name, game_json) VALUES (?, ?, ?)";
+
+        ChessGame game = new ChessGame();
+        String gameJson = gson.toJson(game);
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, null);
+            stmt.setString(2, null);
+            stmt.setString(3, gameName);
+            stmt.setString(gameJson);
+
+            stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getin(1);
+                }
+            }
+
+            throw new DataAccessException("Error creating game");
+        } catch (SQLException e) {
+            throw new DataAccessException("Error creating game", e);
+        }
+    }
 }
