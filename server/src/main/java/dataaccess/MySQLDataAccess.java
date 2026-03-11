@@ -2,14 +2,11 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import com.mysql.cj.jdbc.PreparedStatementWrapper;
-import com.mysql.cj.x.protobuf.MysqlxPrepare;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -117,14 +114,14 @@ public class MySQLDataAccess implements DataAccess {
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
-        String sql = "SELECT game_id, white_username, black_username, game_name, game_json, FROM game";
+        String sql = "SELECT game_id, white_username, black_username, game_name, game_json FROM game";
         Collection<GameData> games = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                ChessGame game = gson.fromJson(rs.getString("game_json"), ChessGame class);
+                ChessGame game = gson.fromJson(rs.getString("game_json"), ChessGame.class);
 
                 GameData gameData = new GameData(
                         rs.getInt("game_id"),
@@ -142,7 +139,7 @@ public class MySQLDataAccess implements DataAccess {
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
-        String sql = "INSERT INTO game (white_username, black_username, game_name, game_json) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO game (white_username, black_username, game_name, game_json) VALUES (?, ?, ?, ?)";
 
         ChessGame game = new ChessGame();
         String gameJson = gson.toJson(game);
@@ -152,13 +149,13 @@ public class MySQLDataAccess implements DataAccess {
             stmt.setString(1, null);
             stmt.setString(2, null);
             stmt.setString(3, gameName);
-            stmt.setString(gameJson);
+            stmt.setString(4, gameJson);
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getin(1);
+                    return rs.getInt(1);
                 }
             }
 

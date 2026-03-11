@@ -15,7 +15,7 @@ public class DatabaseConfigurer {
                     "CREATE TABLE IF NOT EXISTS user (" +
                             "username VARCHAR(255) NOT NULL PRIMARY KEY, " +
                             "password_hash VARCHAR(255) NOT NULL, " +
-                            "email VARCHAR(255) NOT NULL"
+                            "email VARCHAR(255) NOT NULL)"
             );
 
             stmt.executeUpdate(
@@ -25,14 +25,13 @@ public class DatabaseConfigurer {
             );
 
             stmt.executeUpdate(
-                    "CREATE TABLE IF NOT EXISTS game(" +
+                    "CREATE TABLE IF NOT EXISTS game (" +
                             "game_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
                             "white_username VARCHAR(255), " +
                             "black_username VARCHAR(255), " +
                             "game_name VARCHAR(255) NOT NULL, " +
-                            "game_json LONGTEXT NOT NULL"
+                            "game_json LONGTEXT NOT NULL)"
             );
-            stmt.close();
         } catch (SQLException e) {
             throw new DataAccessException("Error configuring database", e);
         }

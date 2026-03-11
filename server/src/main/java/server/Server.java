@@ -1,7 +1,9 @@
 package server;
 
 import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseConfigurer;
+import dataaccess.MySQLDataAccess;
 import handler.ClearHandler;
 import handler.GameHandler;
 import handler.UserHandler;
@@ -12,11 +14,18 @@ import service.ClearService;
 import service.GameService;
 import service.UserService;
 
+import javax.xml.crypto.Data;
+
 public class Server {
 
     private final Javalin javalin;
 
     public Server() {
+        try{
+            DatabaseConfigurer.configureDataBase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         javalin = Javalin.create(config -> {
             config.staticFiles.add(staticFiles -> {
                 staticFiles.hostedPath = "/";
@@ -26,7 +35,7 @@ public class Server {
             config.jsonMapper(new JavalinGson());
         });
 
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new MySQLDataAccess();
 
         ClearService clearService = new ClearService(dao);
         ClearHandler clearHandler = new ClearHandler(clearService);
