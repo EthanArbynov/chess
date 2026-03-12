@@ -53,8 +53,8 @@ public class UserHandler {
             ctx.status(200);
             ctx.result("{}");
         } catch (DataAccessException e) {
-            handleLogoutError(ctx, e);
-        } catch(Exception e) {
+            HandlerUtil.handleUnauthorizedOnly(ctx, e);
+        } catch (Exception e) {
             HandlerUtil.sendError(ctx, 500, e.getMessage());
         }
     }
@@ -82,17 +82,6 @@ public class UserHandler {
             HandlerUtil.sendError(ctx, 400, "bad request");
             return;
         }
-
-        if ("unauthorized".equals(msg)) {
-            HandlerUtil.sendError(ctx, 401, "unauthorized");
-            return;
-        }
-
-        HandlerUtil.sendError(ctx, 500, msg);
-    }
-
-    private void handleLogoutError(Context ctx, DataAccessException e) {
-        String msg = e.getMessage();
 
         if ("unauthorized".equals(msg)) {
             HandlerUtil.sendError(ctx, 401, "unauthorized");

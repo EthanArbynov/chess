@@ -32,7 +32,7 @@ public class GameHandler {
             ctx.status(200);
             ctx.json(result);
         } catch (DataAccessException e) {
-            handleListGamesError(ctx, e);
+            HandlerUtil.handleUnauthorizedOnly(ctx, e);
         } catch (Exception e) {
             HandlerUtil.sendError(ctx, 500, e.getMessage());
         }
@@ -65,6 +65,7 @@ public class GameHandler {
                 HandlerUtil.sendError(ctx, 400, "bad request");
                 return;
             }
+
             gameService.joinGame(token, req.gameID, req.playerColor);
             ctx.status(200);
             ctx.result("{}");
@@ -73,17 +74,6 @@ public class GameHandler {
         } catch (Exception e) {
             HandlerUtil.sendError(ctx, 500, "bad request");
         }
-    }
-
-    private void handleListGamesError(Context ctx, DataAccessException e) {
-        String msg = e.getMessage();
-
-        if ("unauthorized".equals(msg)) {
-            HandlerUtil.sendError(ctx, 401, "unauthorized");
-            return;
-        }
-
-        HandlerUtil.sendError(ctx, 500, msg);
     }
 
     private void handleCreateGameError(Context ctx, DataAccessException e) {

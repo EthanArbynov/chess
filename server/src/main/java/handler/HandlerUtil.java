@@ -1,5 +1,6 @@
 package handler;
 
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 
 import java.util.HashMap;
@@ -12,5 +13,16 @@ public class HandlerUtil {
         resp.put("message", "Error: " + message);
         ctx.status(statusCode);
         ctx.json(resp);
+    }
+
+    public static void handleUnauthorizedOnly(Context ctx, DataAccessException e) {
+        String msg = e.getMessage();
+
+        if ("unauthorized".equals(msg)) {
+            sendError(ctx, 401, "unauthorized");
+            return;
+        }
+
+        sendError(ctx, 500, msg);
     }
 }
