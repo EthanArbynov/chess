@@ -6,8 +6,6 @@ import model.GameData;
 import service.GameService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.google.gson.Gson;
 
@@ -31,71 +29,30 @@ public class GameHandler {
             }
 
             ListGamesResult result = new ListGamesResult(summaries);
-
             ctx.status(200);
             ctx.json(result);
         } catch (DataAccessException e) {
-            Map<String, String> resp = new HashMap<>();
-
-            if (e.getMessage().equals("unauthorized")) {
-                resp.put("message", "Error: unauthorized");
-                ctx.status(401);
-                ctx.json(resp);
-                return;
-            }
-
-            resp.put("message", "Error: " + e.getMessage());
-            ctx.status(500);
-            ctx.json(resp);
+            handleListGamesError(ctx, e);
         } catch (Exception e) {
-            Map<String, String> resp = new HashMap<>();
-            resp.put("message", "Error: " + e.getMessage());
-            ctx.status(500);
-            ctx.json(resp);
+            HandlerUtil.sendError(ctx, 500, e.getMessage());
         }
     }
 
     public void createGame(Context ctx) {
         try {
             String token = ctx.header("authorization");
-
             CreateGameRequest req = gson.fromJson(ctx.body(), CreateGameRequest.class);
             if (req == null || req.gameName == null || req.gameName.isEmpty()) {
-                Map<String, String> resp = new HashMap<>();
-                resp.put("message", "Error: bad request");
-                ctx.status(400);
-                ctx.json(resp);
+                HandlerUtil.sendError(ctx, 400, "bad request");
                 return;
             }
             int id = gameService.createGame(token, req.gameName);
-
             ctx.status(200);
             ctx.json(new CreateGameResult(id));
         } catch (DataAccessException e) {
-            Map<String, String> resp = new HashMap<>();
-            String msg = e.getMessage();
-
-            if (msg.equals("unauthorized")) {
-                resp.put("message", "Error: unauthorized");
-                ctx.status(401);
-                ctx.json(resp);
-                return;
-            }
-
-            if (msg.equals("bad request")) {
-                resp.put("message", "Error: bad request");
-                ctx.status(400);
-                ctx.json(resp);
-                return;
-            }
-            resp.put("message", "Error: " + msg);
-            ctx.status(500);
-            ctx.json(resp);
+            handleCreateGameError(ctx, e);
         } catch (Exception e) {
-            Map<String, String> resp = new HashMap<>();
-            resp.put("message", "Error: " + e.getMessage());
-            ctx.status(500);
-            ctx.json(resp);
+            HandlerUtil.sendError(ctx, 500, e.getMessage());
         }
     }
 
@@ -105,43 +62,64 @@ public class GameHandler {
             JoinGameRequest req = gson.fromJson(ctx.body(), JoinGameRequest.class);
 
             if (req == null || req.gameID == null || req.playerColor == null) {
-                Map<String, String> resp = new HashMap<>();
-                resp.put("message", "Error: bad request");
-                ctx.status(400);
-                ctx.json(resp);
+                HandlerUtil.sendError(ctx, 400, "bad request");
                 return;
             }
             gameService.joinGame(token, req.gameID, req.playerColor);
             ctx.status(200);
             ctx.result("{}");
         } catch (DataAccessException e) {
-            String msg = e.getMessage();
-            Map<String, String> resp = new HashMap<>();
-
-            if (msg.equals("unauthorized")) {
-                resp.put("message", "Error: unauthorized");
-                ctx.status(401);
-                ctx.json(resp);
-                return;
-            }
-
-            if (msg.equals("bad request")) {
-                resp.put("message", "Error: bad request");
-                ctx.status(400);
-                ctx.json(resp);
-                return;
-            }
-
-            if (msg.equals("forbidden")) {
-                resp.put("message", "Error: forbidden");
-                ctx.status(403);
-                ctx.json(resp);
-                return;
-            }
-
-            resp.put("message", "Error: " + msg);
-            ctx.status(500);
-            ctx.json(resp);
+            handleJoinGameError(ctx, e);
+        } catch (Exception e) {
+            HandlerUtil.sendError(ctx, 500, "bad request");
         }
+    }
+
+    private void handleListGamesError(Context ctx, DataAccessException e) {
+        String msg = e.getMessage();
+
+        if ("unauthorized".equals(msg)) {
+            HandlerUtil.sendError(ctx, 401, "unauthorized");
+            return;
+        }
+
+        HandlerUtil.sendError(ctx, 500, msg);
+    }
+
+    private void handleCreateGameError(Context ctx, DataAccessException e) {
+        String msg = e.getMessage();
+
+        if ("unauthorized".equals(msg)) {
+            HandlerUtil.sendError(ctx, 401, "unauthorized");
+            return;
+        }
+
+        if ("bad request".equals(msg)) {
+            HandlerUtil.sendError(ctx, 400, "bad request");
+            return;
+        }
+
+        HandlerUtil.sendError(ctx, 500, msg);
+    }
+
+    private void handleJoinGameError(Context ctx, DataAccessException e) {
+        String msg = e.getMessage();
+
+        if ("unauthorized".equals(msg)) {
+            HandlerUtil.sendError(ctx, 401, "unauthorized");
+            return;
+        }
+
+        if ("bad request".equals(msg)) {
+            HandlerUtil.sendError(ctx, 400, "bad request");
+            return;
+        }
+
+        if ("forbidden".equals(msg)) {
+            HandlerUtil.sendError(ctx, 403, "forbidden");
+            return;
+        }
+
+        HandlerUtil.sendError(ctx, 500, msg);
     }
 }

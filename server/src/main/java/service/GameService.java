@@ -5,10 +5,7 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 
-import java.util.ArrayList;
 import java.util.Collection;
-
-import chess.ChessGame;
 
 public class GameService {
     private final DataAccess dao;
@@ -44,8 +41,7 @@ public class GameService {
             throw new DataAccessException("bad request");
         }
 
-        int id = dao.createGame(gameName);
-        return id;
+        return dao.createGame(gameName);
     }
 
     public void joinGame(String authToken, Integer gameID, String playerColor) throws DataAccessException {

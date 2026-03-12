@@ -14,8 +14,6 @@ import service.ClearService;
 import service.GameService;
 import service.UserService;
 
-import javax.xml.crypto.Data;
-
 public class Server {
 
     private final Javalin javalin;

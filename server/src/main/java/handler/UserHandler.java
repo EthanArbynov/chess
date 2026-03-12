@@ -6,9 +6,6 @@ import io.javalin.http.Context;
 import model.UserData;
 import service.UserService;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class UserHandler {
     private final UserService userService;
     private final Gson gson = new Gson();
@@ -24,33 +21,9 @@ public class UserHandler {
             ctx.status(200);
             ctx.json(result);
         } catch (DataAccessException e) {
-            String msg = e.getMessage();
-
-            Map<String, String> resp = new HashMap<>();
-
-            if (msg.equals("bad request")) {
-                resp.put("message", "Error: bad request");
-                ctx.status(400);
-                ctx.json(resp);
-                return;
-            }
-
-            if (msg.equals("forbidden") || msg.equals("already taken")) {
-                resp.put("message", "Error: forbidden");
-                ctx.status(403);
-                ctx.json(resp);
-                return;
-            }
-
-            resp.put("message", "Error: " + msg);
-            ctx.status(500);
-            ctx.json(resp);
-
+            handleRegisterError(ctx, e);
         } catch (Exception e) {
-            Map<String, String> resp = new HashMap<>();
-            resp.put("message", "Error: " + e.getMessage());
-            ctx.status(500);
-            ctx.json(resp);
+            HandlerUtil.sendError(ctx, 500, e.getMessage());
         }
     }
 
@@ -59,10 +32,7 @@ public class UserHandler {
             LoginRequest req = gson.fromJson(ctx.body(), LoginRequest.class);
 
             if (req == null) {
-                Map<String, String> resp = new HashMap<>();
-                resp.put("message", "Error: bad request");
-                ctx.status(400);
-                ctx.json(resp);
+                HandlerUtil.sendError(ctx, 400, "bad request");
                 return;
             }
 
@@ -70,31 +40,9 @@ public class UserHandler {
             ctx.status(200);
             ctx.json(result);
         } catch (DataAccessException e) {
-            String msg = e.getMessage();
-            Map<String, String> resp = new HashMap<>();
-
-            if (msg.equals("bad request")) {
-                resp.put("message", "Error: bad request");
-                ctx.status(400);
-                ctx.json(resp);
-                return;
-            }
-
-            if (msg.equals("unauthorized")) {
-                resp.put("message", "Error: unauthorized");
-                ctx.status(401);
-                ctx.json(resp);
-                return;
-            }
-
-            resp.put("message", "Error: " + msg);
-            ctx.status(500);
-            ctx.json(resp);
+            handleLoginError(ctx, e);
         } catch(Exception e) {
-            Map<String, String> resp = new HashMap<>();
-            resp.put("message", "Error: " + e.getMessage());
-            ctx.status(500);
-            ctx.json(resp);
+            HandlerUtil.sendError(ctx, 500, e.getMessage());
         }
     }
 
@@ -105,24 +53,52 @@ public class UserHandler {
             ctx.status(200);
             ctx.result("{}");
         } catch (DataAccessException e) {
-            String msg = e.getMessage();
-            Map<String, String> resp = new HashMap<>();
-
-            if (msg.equals("unauthorized")) {
-                resp.put("message", "Error: unauthorized");
-                ctx.status(401);
-                ctx.json(resp);
-                return;
-            }
-
-            resp.put("message", "Error: " + msg);
-            ctx.status(500);
-            ctx.json(resp);
+            handleLogoutError(ctx, e);
         } catch(Exception e) {
-            Map<String, String> resp = new HashMap<>();
-            resp.put("message", "Error: " + e.getMessage());
-            ctx.status(500);
-            ctx.json(resp);
+            HandlerUtil.sendError(ctx, 500, e.getMessage());
         }
+    }
+
+    private void handleRegisterError(Context ctx, DataAccessException e) {
+        String msg = e.getMessage();
+
+        if ("bad request".equals(msg)) {
+            HandlerUtil.sendError(ctx, 400, "bad request");
+            return;
+        }
+
+        if ("forbidden".equals(msg)) {
+            HandlerUtil.sendError(ctx, 403, "forbidden");
+            return;
+        }
+
+        HandlerUtil.sendError(ctx, 500, msg);
+    }
+
+    private void handleLoginError(Context ctx, DataAccessException e) {
+        String msg = e.getMessage();
+
+        if ("bad request".equals(msg)) {
+            HandlerUtil.sendError(ctx, 400, "bad request");
+            return;
+        }
+
+        if ("unauthorized".equals(msg)) {
+            HandlerUtil.sendError(ctx, 401, "unauthorized");
+            return;
+        }
+
+        HandlerUtil.sendError(ctx, 500, msg);
+    }
+
+    private void handleLogoutError(Context ctx, DataAccessException e) {
+        String msg = e.getMessage();
+
+        if ("unauthorized".equals(msg)) {
+            HandlerUtil.sendError(ctx, 401, "unauthorized");
+            return;
+        }
+
+        HandlerUtil.sendError(ctx, 500, msg);
     }
 }
