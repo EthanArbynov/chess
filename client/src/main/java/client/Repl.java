@@ -3,6 +3,9 @@ package client;
 import java.util.Scanner;
 
 public class Repl {
+    private final ServerFacade server = new ServerFacade("http://localhost:8080");
+    private String authToken = null;
+
     public void run() {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -43,27 +46,35 @@ public class Repl {
     }
 
     private void login(Scanner scanner) {
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
+        try {
+            System.out.print("Username: ");
+            String username = scanner.nextLine();
 
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
+            System.out.print("Password: ");
+            String password = scanner.nextLine();
 
-        System.out.println("Login not implemented yet.");
-        System.out.println("You entered username: " + username);
+            authToken = server.login(username, password);
+            System.out.println("Logged in successfully.");
+        } catch (Exception e) {
+            System.out.println("Login failed: " + e.getMessage());
+        }
     }
 
     private void register(Scanner scanner) {
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
+        try {
+            System.out.print("Username: ");
+            String username = scanner.nextLine();
 
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
+            System.out.print("Password: ");
+            String password = scanner.nextLine();
 
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
+            System.out.print("Email: ");
+            String email = scanner.nextLine();
 
-        System.out.println("Register not implemented yet.");
-        System.out.println("You entered username: " + username + ", email: " + email);
+            authToken = server.register(username, password, email);
+            System.out.println("Registered successfully.");
+        } catch (Exception e) {
+            System.out.println("Register failed: " + e.getMessage());
+        }
     }
 }
