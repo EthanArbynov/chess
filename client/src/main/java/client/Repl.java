@@ -57,7 +57,7 @@ public class Repl {
                     playGame(scanner);
                     break;
                 case "observe":
-                    System.out.println("Observe not implemented yet.");
+                    observeGame(scanner);
                     break;
                 case "quit":
                     System.out.println("Goodbye!");
@@ -217,6 +217,37 @@ public class Repl {
             System.out.println("Please enter a valid number.");
         } catch (Exception e) {
             System.out.println("Play failed: " + e.getMessage());
+        }
+    }
+
+    private void observeGame(Scanner scanner) {
+        try {
+            if (lastGames == null || lastGames.isEmpty()) {
+                System.out.println("No games available. Use 'list' first.");
+                return;
+            }
+
+            System.out.print("Game number: ");
+            String numberInput = scanner.nextLine().trim();
+            int number = Integer.parseInt(numberInput);
+
+            if (number < 1 || number > lastGames.size()) {
+                System.out.println("Invalid game number.");
+                return;
+            }
+
+            GameData game = lastGames.get(number - 1);
+
+            System.out.println("Observing game: " + game.gameName());
+
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+            BoardPrinter.drawBoard(board, false);
+
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        } catch (Exception e) {
+            System.out.println("Observe failed: " + e.getMessage());
         }
     }
 }
