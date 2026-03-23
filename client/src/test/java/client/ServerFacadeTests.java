@@ -51,4 +51,23 @@ public class ServerFacadeTests {
         assertNotNull(authToken);
         assertFalse(authToken.isBlank());
     }
+
+    @Test
+    public void loginNegative() {
+        assertThrows(ClientException.class, () ->
+                facade.login("badUser", "badPassword"));
+    }
+
+    @Test
+    public void logoutPositive() throws Exception {
+        String authToken = facade.register("player1", "password", "p1@email.com");
+
+        assertDoesNotThrow(() -> facade.logout(authToken));
+    }
+
+    @Test
+    public void logoutNegative() {
+        assertThrows(ClientException.class, () ->
+                facade.logout("badAuthToken"));
+    }
 }
