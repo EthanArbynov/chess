@@ -70,4 +70,29 @@ public class ServerFacadeTests {
         assertThrows(ClientException.class, () ->
                 facade.logout("badAuthToken"));
     }
+
+    @Test
+    public void createGamePositive() throws Exception {
+        String authToken = facade.register("player1", "password", "p1@email.com");
+
+        int gameID = facade.createGame(authToken, "testGame");
+        assertTrue(gameID > 0);
+    }
+
+    @Test
+    public void createGameNegative() {
+        assertThrows(ClientException.class, () ->
+                facade.createGame("badAuthToken", "testGame"));
+    }
+
+    @Test
+    public void listGamesPositive() throws Exception {
+        String authToken = facade.register("player1", "password", "p1@email.com");
+        facade.createGame(authToken, "testGame");
+
+        ListGamesResponse response = facade.listGames(authToken);
+        assertNotNull(response);
+        assertNotNull(response.games());
+        assertEquals(1, response.games().size());
+    }
 }
