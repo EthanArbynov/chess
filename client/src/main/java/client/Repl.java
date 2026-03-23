@@ -54,7 +54,7 @@ public class Repl {
                     listGames();
                     break;
                 case "play":
-                    System.out.println("Play not implemented yet.");
+                    playGame(scanner);
                     break;
                 case "observe":
                     System.out.println("Observe not implemented yet.");
@@ -175,6 +175,48 @@ public class Repl {
             }
         } catch (Exception e) {
             System.out.println("List failed: " + e.getMessage());
+        }
+    }
+
+    private void playGame(Scanner scanner) {
+        try {
+            if (lastGames == null || lastGames.isEmpty()) {
+                System.out.println("No games available. Use 'list' first.");
+                return;
+            }
+
+            System.out.print("Game number: ");
+            String numberInput = scanner.nextLine().trim();
+            int number = Integer.parseInt(numberInput);
+
+            if (number < 1 || number > lastGames.size()) {
+                System.out.println("Invalid game number.");
+                return;
+            }
+
+            System.out.print("Color (WHITE or BLACK): ");
+            String color = scanner.nextLine().trim().toUpperCase();
+
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                System.out.println("Invalid color.");
+                return;
+            }
+
+            GameData game = lastGames.get(number - 1);
+            server.joinGame(authToken, color, game.gameID());
+
+            System.out.println("Joined game successfully.");
+
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+
+            boolean blackPerspective = color.equals("BLACK");
+            BoardPrinter.drawBoard(board, blackPerspective);
+
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        } catch (Exception e) {
+            System.out.println("Play failed: " + e.getMessage());
         }
     }
 }
