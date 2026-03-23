@@ -1,11 +1,14 @@
 package client;
 
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Repl {
     private final ServerFacade server = new ServerFacade("http://localhost:8080");
     private String authToken = null;
     private boolean loggedIn = false;
+    private List<GameData> lastGames = new ArrayList<>();
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
@@ -45,10 +48,10 @@ public class Repl {
                     logout();
                     break;
                 case "create":
-                    System.out.println("Create not implemented yet.");
+                    createGame(scanner);
                     break;
                 case "list":
-                    System.out.println("List not implemented yet.");
+                    listGames();
                     break;
                 case "play":
                     System.out.println("Play not implemented yet.");
@@ -136,6 +139,42 @@ public class Repl {
             System.out.println("Logged out successfully.");
         } catch (Exception e) {
             System.out.println("Logout failed: " + e.getMessage());
+        }
+    }
+
+    private void createGame(Scanner scanner) {
+        try {
+            System.out.print("Game name: ");
+            String gameName = scanner.nextLine();
+
+            int gameID = server.createGame(authToken, gameName);
+            System.out.println("Game created successfully.");
+        } catch (Exception e) {
+            System.out.println("Create failed: " + e.getMessage());
+        }
+    }
+
+    private void listGames() {
+        try {
+            lastGames = server.listGames(authToken);
+
+            if (lastGames.games() == null || lastGames.games().isEmpty()) {
+                System.out.println("No games found.");
+                return;
+            }
+
+            for (int i = 0; i < lastGames.games().size(); i++) {
+                GameData game = lastGames.games().get(i);
+
+                String white = game.whiteUsername() == null ? "(open)" : game.whiteUsername();
+                String black = game.blackUsername() == null ? "(open)" : game.blackUsername();
+
+                System.out.println((i + 1) + ". " + game.gameName()
+                        + " | White: " + white
+                        + " | Black: " + black);
+            }
+        } catch (Exception e) {
+            System.out.println("List failed: " + e.getMessage());
         }
     }
 }
