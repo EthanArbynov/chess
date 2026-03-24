@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -39,13 +40,18 @@ public class ServerFacade {
         return response.gameID();
     }
 
-    public ListGamesResponse listGames(String authToken) throws ClientException {
-        return makeRequest("GET", "/game", null, authToken, ListGamesResponse.class);
+    public List<GameData> listGames(String authToken) throws ClientException {
+        ListGamesResponse response = makeRequest("GET", "/game", null, authToken, ListGamesResponse.class);
+        return response.games();
     }
 
     public void joinGame(String authToken, String playerColor, int gameID) throws ClientException {
         var request = new JoinGameRequest(playerColor, gameID);
         makeRequest("PUT", "/game", request, authToken, null);
+    }
+
+    public void clear() throws ClientException {
+        makeRequest("DELETE", "/db", null, null, null);
     }
 
     private <T> T makeRequest(String method, String path, Object requestBody,

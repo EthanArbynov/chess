@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,61 +21,53 @@ public class Repl {
         while (running) {
             System.out.print("> ");
             String input = scanner.nextLine().trim().toLowerCase();
-
-            switch (input) {
-                case "help":
-                    printPreloginHelp();
-                    break;
-                case "login":
-                    login(scanner);
-                    break;
-                case "register":
-                    register(scanner);
-                    break;
-                case "quit":
-                    System.out.println("Goodbye!");
-                    running = false;
-                    break;
-                default:
-                    System.out.println("Unknown command. Type 'help' for options.");
+            if (!loggedIn) {
+                switch (input) {
+                    case "help":
+                        printPreloginHelp();
+                        break;
+                    case "login":
+                        login(scanner);
+                        break;
+                    case "register":
+                        register(scanner);
+                        break;
+                    case "quit":
+                        System.out.println("Goodbye!");
+                        running = false;
+                        break;
+                    default:
+                        System.out.println("Unknown command. Type 'help' for options.");
+                }
+            } else {
+                switch (input) {
+                    case "help":
+                        printPostloginHelp();
+                        break;
+                    case "logout":
+                        logout();
+                        break;
+                    case "create":
+                        createGame(scanner);
+                        break;
+                    case "list":
+                        listGames();
+                        break;
+                    case "play":
+                        playGame(scanner);
+                        break;
+                    case "observe":
+                        observeGame(scanner);
+                        break;
+                    case "quit":
+                        System.out.println("Goodbye!");
+                        running = false;
+                        break;
+                    default:
+                        System.out.println("Unknown command. Type 'help' for options.");
+                }
             }
         }
-        else {
-            switch (input) {
-                case "help":
-                    printPreloginHelp();
-                    break;
-                case "logout":
-                    logout();
-                    break;
-                case "create":
-                    createGame(scanner);
-                    break;
-                case "list":
-                    listGames();
-                    break;
-                case "play":
-                    playGame(scanner);
-                    break;
-                case "observe":
-                    observeGame(scanner);
-                    break;
-                case "quit":
-                    System.out.println("Goodbye!");
-                    running = false;
-                    break;
-                default;
-                    System.out.println("Unknown command. Type 'help' for options.")
-            }
-        }
-    }
-
-    private void printHelp() {
-        System.out.println("Commands:");
-        System.out.println("  help     - show commands");
-        System.out.println("  login    - log in");
-        System.out.println("  register - create account");
-        System.out.println("  quit     - exit");
     }
 
     private void login(Scanner scanner) {
@@ -158,13 +151,13 @@ public class Repl {
         try {
             lastGames = server.listGames(authToken);
 
-            if (lastGames.games() == null || lastGames.games().isEmpty()) {
+            if (lastGames == null || lastGames.isEmpty()) {
                 System.out.println("No games found.");
                 return;
             }
 
-            for (int i = 0; i < lastGames.games().size(); i++) {
-                GameData game = lastGames.games().get(i);
+            for (int i = 0; i < lastGames.size(); i++) {
+                GameData game = lastGames.get(i);
 
                 String white = game.whiteUsername() == null ? "(open)" : game.whiteUsername();
                 String black = game.blackUsername() == null ? "(open)" : game.blackUsername();
