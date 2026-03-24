@@ -21,12 +21,18 @@ public class ServerFacade {
     public String register(String username, String password, String email) throws ClientException {
         var request = new RegisterRequest(username, password, email);
         var response = makeRequest("POST", "/user", request, null, AuthResponse.class);
+        if (response == null) {
+            throw new ClientException("No response from server");
+        }
         return response.authToken();
     }
 
     public String login(String username, String password) throws ClientException {
         var request = new LoginRequest(username, password);
         var response = makeRequest("POST", "/session", request, null, AuthResponse.class);
+        if (response == null) {
+            throw new ClientException("No response from server");
+        }
         return response.authToken();
     }
 
@@ -37,11 +43,17 @@ public class ServerFacade {
     public int createGame(String authToken, String gameName) throws ClientException {
         var request = new CreateGameRequest(gameName);
         var response = makeRequest("POST", "/game", request, authToken, CreateGameResponse.class);
+        if (response == null) {
+            throw new ClientException("No response from server");
+        }
         return response.gameID();
     }
 
     public List<GameData> listGames(String authToken) throws ClientException {
         ListGamesResponse response = makeRequest("GET", "/game", null, authToken, ListGamesResponse.class);
+        if (response == null) {
+            throw new ClientException("No response from server");
+        }
         return response.games();
     }
 

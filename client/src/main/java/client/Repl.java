@@ -24,7 +24,7 @@ public class Repl {
             if (!loggedIn) {
                 switch (input) {
                     case "help":
-                        printPreloginHelp();
+                        printPreLoginHelp();
                         break;
                     case "login":
                         login(scanner);
@@ -42,7 +42,7 @@ public class Repl {
             } else {
                 switch (input) {
                     case "help":
-                        printPostloginHelp();
+                        printPostLoginHelp();
                         break;
                     case "logout":
                         logout();
@@ -105,7 +105,7 @@ public class Repl {
         }
     }
 
-    private void printPreloginHelp() {
+    private void printPreLoginHelp() {
         System.out.println("Commands: ");
         System.out.println("  help     - show commands");
         System.out.println("  login    - log in");
@@ -113,7 +113,7 @@ public class Repl {
         System.out.println("  quit     - exit");
     }
 
-    private void printPostloginHelp() {
+    private void printPostLoginHelp() {
         System.out.println("Commands:");
         System.out.println("  help     - show commands");
         System.out.println("  logout   - log out");
@@ -140,7 +140,7 @@ public class Repl {
             System.out.print("Game name: ");
             String gameName = scanner.nextLine();
 
-            int gameID = server.createGame(authToken, gameName);
+            server.createGame(authToken, gameName);
             System.out.println("Game created successfully.");
         } catch (Exception e) {
             System.out.println("Create failed: " + e.getMessage());
