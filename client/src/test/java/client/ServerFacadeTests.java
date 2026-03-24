@@ -95,4 +95,27 @@ public class ServerFacadeTests {
         assertNotNull(response.games());
         assertEquals(1, response.games().size());
     }
+
+    @Test
+    public void listGamesNegative() {
+        assertThrows(ClientException.class, () ->
+                facade.listGames("badAuthToken"));
+    }
+
+    @Test
+    public void joinGamePositive() throws Exception {
+        String authToken = facade.register("player1", "password", "p1@email.com");
+        int gameID = facade.createGame(authToken, "testGame");
+
+        assertDoesNotThrow(() -> facade.joinGame(authToken, "WHITE", gameID));
+    }
+
+    @Test
+    public void joinGameNegative() throws Exception {
+        String authToken = facade.register("player1", "password", "p1@email.com");
+        int gameID = facade.createGame(authToken, "testGame");
+
+        assertThrows(ClientException.class, () ->
+                facade.joinGame("badAuthToken", "WHITE", gameID));
+    }
 }
