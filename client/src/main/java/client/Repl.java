@@ -197,6 +197,8 @@ public class Repl {
 
             GameData game = lastGames.get(number - 1);
             server.joinGame(authToken, color, game.gameID());
+            WSClient ws = new WSClient(authToken, game.gameID());
+            ws.connect();
 
             System.out.println("Joined game successfully.");
 
@@ -230,6 +232,8 @@ public class Repl {
             }
 
             GameData game = lastGames.get(number - 1);
+            WSClient ws = new WSClient(authToken, game.gameID());
+            ws.connect();
 
             System.out.println("Observing game: " + game.gameName());
 

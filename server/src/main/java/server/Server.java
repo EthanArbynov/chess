@@ -47,12 +47,12 @@ public class Server {
         javalin.delete("/db", clearHandler::clear);
         javalin.post("/user", userHandler::register);
         javalin.post("/session", userHandler::login);
-        javalin.delete("/session", userHandler:: logout);
+        javalin.delete("/session", userHandler::logout);
         javalin.get("/game", gameHandler::listGames);
         javalin.post("/game", gameHandler::createGame);
         javalin.put("/game", gameHandler::joinGame);
         WebSocketHandler webSocketHandler = new WebSocketHandler(dao);
-        javalin.ws("/ws", new WebSocketHandler(dao));
+        javalin.ws("/ws", webSocketHandler::handle);
     }
 
     public int run(int desiredPort) {
