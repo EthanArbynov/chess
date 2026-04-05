@@ -23,7 +23,7 @@ public class BoardPrinter {
                 ChessPosition pos = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(pos);
 
-                boolean light = (row + col) % 2 == 0;
+                boolean light = (row + col) % 2 != 0;
                 String bgColor = light
                         ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
                         : EscapeSequences.SET_BG_COLOR_DARK_GREY;
