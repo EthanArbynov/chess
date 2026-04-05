@@ -4,12 +4,13 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import jakarta.websocket.Session;
 import model.AuthData;
 import model.GameData;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
+import websocket.commands.MakeMoveCommand;
+import websocket.messages.NotificationMessage;
 
 import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsContext;
@@ -22,7 +23,6 @@ public class WebSocketHandler {
     private final DataAccess dao;
     private final Gson gson = new Gson();
 
-    // session id -> connection info
     private final Map<String, Connection> connections = new ConcurrentHashMap<>();
 
     public WebSocketHandler(DataAccess dao) {
@@ -46,11 +46,12 @@ public class WebSocketHandler {
                 if (command.getCommandType() == UserGameCommand.CommandType.CONNECT) {
                     connect(ctx, command);
                 } else if (command.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
-                    // later
+                    MakeMoveCommand moveCommand = gson.fromJson(ctx.message(), MakeMoveCommand.class);
+                    makeMove(ctx, moveCommand);
                 } else if (command.getCommandType() == UserGameCommand.CommandType.LEAVE) {
-                    // later
+                    leave(ctx, command);
                 } else if (command.getCommandType() == UserGameCommand.CommandType.RESIGN) {
-                    // later
+                    resign(ctx, command);
                 }
 
             } catch (Exception e) {
@@ -105,4 +106,63 @@ public class WebSocketHandler {
             this.username = username;
         }
     }
+
+    private void makeMove(WsContext ctx, MakeMoveCommand command) {
+        try {
+            AuthData auth = dao.getAuth(command.getAuthToken());
+            if (auth == null) {
+                sendError(ctx, "Error: unauthorized");
+                return;
+            }
+
+            GameData gameData = dao.getGame(command.getGameID());
+            if (gameData == null) {
+                sendError(ctx, "Error: bad game");
+                return;
+            }
+
+            ChessGame game = gameData.game();
+            if (game.isGameOver()) {
+                sendError(ctx, "Error: game is over");
+                return;
+            }
+            game.makeMove(command.getMove());
+
+            GameData updatedGame = new GameData(
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    game
+            );
+
+            dao.updateGame(updatedGame);
+
+            LoadGameMessage loadMessage = new LoadGameMessage(game);
+            broadcast(command.getGameID(), gson.toJson(loadMessage));
+
+            NotificationMessage note = new NotificationMessage(auth.username() + " made a move");
+            broadcastExcept(command.getGameID(), ctx.getSessionId(), gson.toJson(note));
+
+        } catch (Exception e) {
+            sendError(ctx, "Error: invalid move");
+        }
+    }
+
+    private void broadcast(int gameID, String message) {
+        for (Connection connection : connections.values()) {
+            if (connection.gameID == gameID) {
+                connection.ctx.send(message);
+            }
+        }
+    }
+
+    private void broadcastExcept(int gameID, String excludedSessionID, String message) {
+        for (Map.Entry<String, Connection> entry : connections.entrySet()) {
+            if (entry.getValue().gameID == gameID && !entry.getKey().equals(excludedSessionID)) {
+                entry.getValue().ctx.send(message);
+            }
+        }
+    }
+
 }

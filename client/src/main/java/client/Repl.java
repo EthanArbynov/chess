@@ -1,6 +1,6 @@
 package client;
 
-import chess.ChessBoard;
+import chess.*;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
@@ -197,16 +197,13 @@ public class Repl {
 
             GameData game = lastGames.get(number - 1);
             server.joinGame(authToken, color, game.gameID());
-            WSClient ws = new WSClient(authToken, game.gameID());
+
+            boolean blackPerspective = color.equals("BLACK");
+            WSClient ws = new WSClient(authToken, game.gameID(), blackPerspective);
             ws.connect();
 
             System.out.println("Joined game successfully.");
-
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-
-            boolean blackPerspective = color.equals("BLACK");
-            BoardPrinter.drawBoard(board, blackPerspective);
+            runGameplayLoop(scanner, ws, false);
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
@@ -232,19 +229,124 @@ public class Repl {
             }
 
             GameData game = lastGames.get(number - 1);
-            WSClient ws = new WSClient(authToken, game.gameID());
+
+            WSClient ws = new WSClient(authToken, game.gameID(), false);
             ws.connect();
 
             System.out.println("Observing game: " + game.gameName());
-
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-            BoardPrinter.drawBoard(board, false);
+            runGameplayLoop(scanner, ws, true);
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         } catch (Exception e) {
             System.out.println("Observe failed: " + e.getMessage());
         }
+    }
+
+    private void runGameplayLoop(Scanner scanner, WSClient ws, boolean observing) {
+        boolean inGame = true;
+
+        printGameplayHelp(observing);
+
+        while (inGame) {
+            System.out.print("[game] > ");
+            String input = scanner.nextLine().trim().toLowerCase();
+
+            try {
+                switch (input) {
+                    case "help":
+                        printGameplayHelp(observing);
+                        break;
+                    case "redraw":
+                        System.out.println("Board redraw comes from the latest LOAD_GAME message.");
+                        break;
+                    case "move":
+                        if (observing) {
+                            System.out.println("Observers cannot make moves.");
+                        } else {
+                            makeMove(scanner, ws);
+                        }
+                        break;
+                    case "leave":
+                        ws.sendLeave();
+                        ws.close();
+                        inGame = false;
+                        System.out.println("Left game.");
+                        break;
+                    case "resign":
+                        if (observing) {
+                            System.out.println("Observers cannot resign.");
+                        } else {
+                            System.out.print("Are you sure you want to resign? (yes/no): ");
+                            String confirm = scanner.nextLine().trim().toLowerCase();
+                            if (confirm.equals("yes")) {
+                                ws.sendResign();
+                                System.out.println("You resigned.");
+                            }
+                        }
+                        break;
+                    case "highlight":
+                        System.out.println("Highlight can be added later.");
+                        break;
+                    default:
+                        System.out.println("Unknown command. Type 'help' for options.");
+                }
+            } catch (Exception e) {
+                System.out.println("Gameplay error: " + e.getMessage());
+            }
+        }
+    }
+
+    private void printGameplayHelp(boolean observing) {
+        System.out.println("Gameplay commands:");
+        System.out.println("  help      - show commands");
+        System.out.println("  redraw    - redraw board");
+        System.out.println("  leave     - leave the game");
+        System.out.println("  highlight - highlight legal moves");
+
+        if (!observing) {
+            System.out.println("  move      - make a move");
+            System.out.println("  resign    - resign the game");
+        }
+    }
+
+    private void makeMove(Scanner scanner, WSClient ws) throws Exception {
+        System.out.print("Start position (example e2): ");
+        String startText = scanner.nextLine().trim().toLowerCase();
+
+        System.out.print("End position (example e4): ");
+        String endText = scanner.nextLine().trim().toLowerCase();
+
+        ChessPosition start = parsePosition(startText);
+        ChessPosition end = parsePosition(endText);
+
+        System.out.print("Promotion piece? (QUEEN/ROOK/BISHOP/KNIGHT or blank): ");
+        String promoText = scanner.nextLine().trim().toUpperCase();
+
+        ChessPiece.PieceType promotion = null;
+        if (!promoText.isEmpty()) {
+            promotion = ChessPiece.PieceType.valueOf(promoText);
+        }
+
+        ChessMove move = new ChessMove(start, end, promotion);
+        ws.sendMove(move);
+    }
+
+    private ChessPosition parsePosition(String text) {
+        if (text.length() != 2) {
+            throw new IllegalArgumentException("Bad position.");
+        }
+
+        char file = text.charAt(0);
+        char rank = text.charAt(1);
+
+        int col = file - 'a' + 1;
+        int row = rank - '0';
+
+        if (col < 1 || col > 8 || row < 1 || row > 8) {
+            throw new IllegalArgumentException("Bad position.");
+        }
+
+        return new ChessPosition(row, col);
     }
 }

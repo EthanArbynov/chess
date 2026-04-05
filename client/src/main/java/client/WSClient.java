@@ -1,9 +1,18 @@
 package client;
 
+import chess.ChessMove;
+import websocket.commands.MakeMoveCommand;
 import com.google.gson.Gson;
-import jakarta.websocket.*;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 import org.glassfish.tyrus.client.ClientManager;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.net.URI;
 
@@ -14,10 +23,12 @@ public class WSClient {
     private final Gson gson = new Gson();
     private final String authToken;
     private final int gameID;
+    private final boolean blackPerspective;
 
-    public WSClient(String authToken, int gameID) {
+    public WSClient(String authToken, int gameID, boolean blackPerspective) {
         this.authToken = authToken;
         this.gameID = gameID;
+        this.blackPerspective = blackPerspective;
     }
 
     public void connect() throws Exception {
@@ -37,16 +48,43 @@ public class WSClient {
 
     @OnMessage
     public void onMessage(String message) {
-        System.out.println(message);
-    }
+        ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
 
-    public void send(String json) throws Exception {
-        session.getBasicRemote().sendText(json);
+        if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            LoadGameMessage loadGameMessage = gson.fromJson(message, LoadGameMessage.class);
+            ChessGame game = loadGameMessage.getGame();
+            BoardPrinter.drawBoard(game.getBoard(), blackPerspective);
+
+        } else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+            ErrorMessage errorMessage = gson.fromJson(message, ErrorMessage.class);
+            System.out.println(errorMessage.getErrorMessage());
+
+        } else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+            NotificationMessage notificationMessage = gson.fromJson(message, NotificationMessage.class);
+            System.out.println(notificationMessage.getMessage());
+        }
     }
 
     public void close() throws Exception {
         if (session != null) {
             session.close();
         }
+    }
+
+    public void sendLeave() throws Exception {
+        UserGameCommand command =
+                new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+        session.getBasicRemote().sendText(gson.toJson(command));
+    }
+
+    public void sendResign() throws Exception {
+        UserGameCommand command =
+                new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+        session.getBasicRemote().sendText(gson.toJson(command));
+    }
+
+    public void sendMove(ChessMove move) throws Exception {
+        MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
+        session.getBasicRemote().sendText(gson.toJson(command));
     }
 }
