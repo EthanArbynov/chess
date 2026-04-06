@@ -24,6 +24,7 @@ public class WSClient {
     private final String authToken;
     private final int gameID;
     private final boolean blackPerspective;
+    private ChessGame currentGame;
 
     public WSClient(String authToken, int gameID, boolean blackPerspective) {
         this.authToken = authToken;
@@ -54,6 +55,7 @@ public class WSClient {
             LoadGameMessage loadGameMessage = gson.fromJson(message, LoadGameMessage.class);
             ChessGame game = loadGameMessage.getGame();
             BoardPrinter.drawBoard(game.getBoard(), blackPerspective);
+
 
         } else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
             ErrorMessage errorMessage = gson.fromJson(message, ErrorMessage.class);
@@ -86,5 +88,13 @@ public class WSClient {
     public void sendMove(ChessMove move) throws Exception {
         MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
         session.getBasicRemote().sendText(gson.toJson(command));
+    }
+
+    public ChessGame getCurrentGame() {
+        return currentGame;
+    }
+
+    public boolean isBlackPerspective() {
+        return blackPerspective;
     }
 }

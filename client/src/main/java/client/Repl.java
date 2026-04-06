@@ -286,7 +286,7 @@ public class Repl {
                         }
                         break;
                     case "highlight":
-                        System.out.println("Highlight can be added later.");
+                        highlightMoves(scanner, ws);
                         break;
                     default:
                         System.out.println("Unknown command. Type 'help' for options.");
