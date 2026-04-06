@@ -19,6 +19,7 @@ public class ChessGame {
     private ChessPosition enPassantSquare = null;
     private ChessPosition enPassantPawnPos = null;
     private TeamColor enPassantPawnColor = null;
+    private boolean gameOver = false;
 
     public ChessGame() {
         board.resetBoard();
@@ -152,6 +153,14 @@ public class ChessGame {
 
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
     }
 
     private ChessBoard copyBoard(ChessBoard original) {
@@ -455,11 +464,13 @@ public class ChessGame {
         if (!(o instanceof ChessGame other)) {
             return false;
         }
-        return teamTurn == other.teamTurn && Objects.equals(board, other.board);
+        return teamTurn == other.teamTurn &&
+                gameOver == other.gameOver &&
+                Objects.equals(board, other.board);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, teamTurn);
+        return Objects.hash(board, teamTurn, gameOver);
     }
 }

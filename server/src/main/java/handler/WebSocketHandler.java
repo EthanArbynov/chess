@@ -36,7 +36,7 @@ public class WebSocketHandler {
         });
 
         ws.onClose(ctx -> {
-            connections.remove(ctx.getSessionId());
+            connections.remove(ctx.sessionId());
         });
 
         ws.onMessage(ctx -> {
@@ -76,7 +76,7 @@ public class WebSocketHandler {
 
             String username = auth.username();
 
-            connections.put(ctx.getSessionId(), new Connection(ctx, command.getGameID(), username));
+            connections.put(ctx.sessionId(), new Connection(ctx, command.getGameID(), username));
 
             ChessGame game = gameData.game();
             LoadGameMessage message = new LoadGameMessage(game);
@@ -93,7 +93,7 @@ public class WebSocketHandler {
             }
 
             NotificationMessage note = new NotificationMessage(messageText);
-            broadcastExcept(command.getGameID(), ctx.getSessionId(), gson.toJson(note));
+            broadcastExcept(command.getGameID(), ctx.sessionId(), gson.toJson(note));
 
         } catch (DataAccessException e) {
             sendError(ctx, "Error: server problem");
@@ -154,25 +154,36 @@ public class WebSocketHandler {
             LoadGameMessage loadMessage = new LoadGameMessage(game);
             broadcast(command.getGameID(), gson.toJson(loadMessage));
 
-            NotificationMessage note = new NotificationMessage(auth.username() + " made a move");
-            broadcastExcept(command.getGameID(), ctx.getSessionId(), gson.toJson(note));
+            NotificationMessage moveNote =
+                    new NotificationMessage(auth.username() + " made a move");
+
+            broadcastExcept(command.getGameID(), ctx.sessionId(), gson.toJson(moveNote));
 
             if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
-                NotificationMessage note = new NotificationMessage("WHITE is in checkmate");
-                broadcast(command.getGameID(), gson.toJson(note));
+                NotificationMessage checkmateNote =
+                        new NotificationMessage("WHITE is in checkmate");
+                broadcast(command.getGameID(), gson.toJson(checkmateNote));
+
             } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
-                NotificationMessage note = new NotificationMessage("BLACK is in checkmate");
-                broadcast(command.getGameID(), gson.toJson(note));
+                NotificationMessage checkmateNote =
+                        new NotificationMessage("BLACK is in checkmate");
+                broadcast(command.getGameID(), gson.toJson(checkmateNote));
+
             } else if (game.isInStalemate(ChessGame.TeamColor.WHITE) ||
                     game.isInStalemate(ChessGame.TeamColor.BLACK)) {
-                NotificationMessage note = new NotificationMessage("The game is in stalemate");
-                broadcast(command.getGameID(), gson.toJson(note));
+                NotificationMessage stalemateNote =
+                        new NotificationMessage("The game is in stalemate");
+                broadcast(command.getGameID(), gson.toJson(stalemateNote));
+
             } else if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
-                NotificationMessage note = new NotificationMessage("WHITE is in check");
-                broadcast(command.getGameID(), gson.toJson(note));
+                NotificationMessage checkNote =
+                        new NotificationMessage("WHITE is in check");
+                broadcast(command.getGameID(), gson.toJson(checkNote));
+
             } else if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
-                NotificationMessage note = new NotificationMessage("BLACK is in check");
-                broadcast(command.getGameID(), gson.toJson(note));
+                NotificationMessage checkNote =
+                        new NotificationMessage("BLACK is in check");
+                broadcast(command.getGameID(), gson.toJson(checkNote));
             }
 
         } catch (Exception e) {
@@ -231,10 +242,10 @@ public class WebSocketHandler {
             );
 
             dao.updateGame(updatedGame);
-            connections.remove(ctx.getSessionId());
+            connections.remove(ctx.sessionId());
 
             NotificationMessage note = new NotificationMessage(username + " left the game");
-            broadcastExcept(command.getGameID(), ctx.getSessionId(), gson.toJson(note));
+            broadcastExcept(command.getGameID(), ctx.sessionId(), gson.toJson(note));
 
         } catch (Exception e) {
             sendError(ctx, "Error: could not leave game");
