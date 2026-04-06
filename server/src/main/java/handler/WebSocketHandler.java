@@ -82,6 +82,19 @@ public class WebSocketHandler {
             LoadGameMessage message = new LoadGameMessage(game);
             ctx.send(gson.toJson(message));
 
+            String messageText;
+
+            if (username.equals(gameData.whiteUsername())) {
+                messageText = username + " connected as WHITE";
+            } else if (username.equals(gameData.blackUsername())) {
+                messageText = username + " connected as BLACK";
+            } else {
+                messageText = username + " connected as an observer";
+            }
+
+            NotificationMessage note = new NotificationMessage(messageText);
+            broadcastExcept(command.getGameID(), ctx.getSessionId(), gson.toJson(note));
+
         } catch (DataAccessException e) {
             sendError(ctx, "Error: server problem");
         }
@@ -143,6 +156,24 @@ public class WebSocketHandler {
 
             NotificationMessage note = new NotificationMessage(auth.username() + " made a move");
             broadcastExcept(command.getGameID(), ctx.getSessionId(), gson.toJson(note));
+
+            if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                NotificationMessage note = new NotificationMessage("WHITE is in checkmate");
+                broadcast(command.getGameID(), gson.toJson(note));
+            } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                NotificationMessage note = new NotificationMessage("BLACK is in checkmate");
+                broadcast(command.getGameID(), gson.toJson(note));
+            } else if (game.isInStalemate(ChessGame.TeamColor.WHITE) ||
+                    game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                NotificationMessage note = new NotificationMessage("The game is in stalemate");
+                broadcast(command.getGameID(), gson.toJson(note));
+            } else if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
+                NotificationMessage note = new NotificationMessage("WHITE is in check");
+                broadcast(command.getGameID(), gson.toJson(note));
+            } else if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
+                NotificationMessage note = new NotificationMessage("BLACK is in check");
+                broadcast(command.getGameID(), gson.toJson(note));
+            }
 
         } catch (Exception e) {
             sendError(ctx, "Error: invalid move");
