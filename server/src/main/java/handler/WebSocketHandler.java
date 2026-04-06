@@ -165,4 +165,91 @@ public class WebSocketHandler {
         }
     }
 
+    private void leave(WsContext ctx, UserGameCommand command) {
+        try {
+            AuthData auth = dao.getAuth(command.getAuthToken());
+            if (auth == null) {
+                sendError(ctx, "Error: unauthorized");
+                return;
+            }
+
+            GameData gameData = dao.getGame(command.getGameID());
+            if (gameData == null) {
+                sendError(ctx, "Error: bad game");
+                return;
+            }
+
+            String username = auth.username();
+
+            String white = gameData.whiteUsername();
+            String black = gameData.blackUsername();
+
+            if (username.equals(white)) {
+                white = null;
+            }
+            if (username.equals(black)) {
+                black = null;
+            }
+
+            GameData updatedGame = new GameData(
+                    gameData.gameID(),
+                    white,
+                    black,
+                    gameData.gameName(),
+                    gameData.game()
+            );
+
+            dao.updateGame(updatedGame);
+            connections.remove(ctx.getSessionId());
+
+            NotificationMessage note = new NotificationMessage(username + " left the game");
+            broadcastExcept(command.getGameID(), ctx.getSessionId(), gson.toJson(note));
+
+        } catch (Exception e) {
+            sendError(ctx, "Error: could not leave game");
+        }
+    }
+
+    private void resign(WsContext ctx, UserGameCommand command) {
+        try {
+            AuthData auth = dao.getAuth(command.getAuthToken());
+            if (auth == null) {
+                sendError(ctx, "Error: unauthorized");
+                return;
+            }
+
+            GameData gameData = dao.getGame(command.getGameID());
+            if (gameData == null) {
+                sendError(ctx, "Error: bad game");
+                return;
+            }
+
+            String username = auth.username();
+
+            boolean isPlayer = username.equals(gameData.whiteUsername()) || username.equals(gameData.blackUsername());
+            if (!isPlayer) {
+                sendError(ctx, "Error: observers cannot resign");
+                return;
+            }
+
+            ChessGame game = gameData.game();
+            game.setGameOver(true);
+
+            GameData updatedGame = new GameData(
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    game
+            );
+
+            dao.updateGame(updatedGame);
+
+            NotificationMessage note = new NotificationMessage(username + " resigned the game");
+            broadcast(command.getGameID(), gson.toJson(note));
+
+        } catch (Exception e) {
+            sendError(ctx, "Error: could not resign");
+        }
+    }
 }
