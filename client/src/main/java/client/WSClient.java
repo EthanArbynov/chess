@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessMove;
+import chess.ChessGame;
 import websocket.commands.MakeMoveCommand;
 import com.google.gson.Gson;
 import jakarta.websocket.ClientEndpoint;
@@ -54,6 +55,7 @@ public class WSClient {
         if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
             LoadGameMessage loadGameMessage = gson.fromJson(message, LoadGameMessage.class);
             ChessGame game = loadGameMessage.getGame();
+            currentGame = game;
             BoardPrinter.drawBoard(game.getBoard(), blackPerspective);
 
 

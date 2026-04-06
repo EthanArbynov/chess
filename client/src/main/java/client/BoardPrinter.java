@@ -2,6 +2,7 @@ package client;
 
 import chess.*;
 import ui.EscapeSequences;
+import java.util.Collection;
 
 public class BoardPrinter {
 
@@ -121,5 +122,26 @@ public class BoardPrinter {
         }
 
         printColumnLabels(cols);
+    }
+
+    private static boolean isSelectedSquare(int row, int col, ChessPosition selected) {
+        return selected != null
+                && selected.getRow() == row
+                && selected.getColumn() == col;
+    }
+
+    private static boolean isLegalMoveSquare(int row, int col, Collection<ChessMove> legalMoves) {
+        if (legalMoves == null) {
+            return false;
+        }
+
+        for (ChessMove move : legalMoves) {
+            if (move.getEndPosition().getRow() == row &&
+                    move.getEndPosition().getColumn() == col) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

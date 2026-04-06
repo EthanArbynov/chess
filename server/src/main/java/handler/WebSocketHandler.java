@@ -134,17 +134,39 @@ public class WebSocketHandler {
                 return;
             }
 
+            String username = auth.username();
+            String whiteUsername = gameData.whiteUsername();
+            String blackUsername = gameData.blackUsername();
+
+            ChessGame.TeamColor playerColor;
+
+            if (username.equals(whiteUsername)) {
+                playerColor = ChessGame.TeamColor.WHITE;
+            } else if (username.equals(blackUsername)) {
+                playerColor = ChessGame.TeamColor.BLACK;
+            } else {
+                sendError(ctx, "Error: observers cannot move");
+                return;
+            }
+
             ChessGame game = gameData.game();
+
             if (game.isGameOver()) {
                 sendError(ctx, "Error: game is over");
                 return;
             }
+
+            if (game.getTeamTurn() != playerColor) {
+                sendError(ctx, "Error: not your turn");
+                return;
+            }
+
             game.makeMove(command.getMove());
 
             GameData updatedGame = new GameData(
                     gameData.gameID(),
-                    gameData.whiteUsername(),
-                    gameData.blackUsername(),
+                    whiteUsername,
+                    blackUsername,
                     gameData.gameName(),
                     game
             );
@@ -156,21 +178,29 @@ public class WebSocketHandler {
 
             NotificationMessage moveNote =
                     new NotificationMessage(auth.username() + " made a move");
-
             broadcastExcept(command.getGameID(), ctx.sessionId(), gson.toJson(moveNote));
 
             if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                game.setGameOver(true);
+                dao.updateGame(updatedGame);
+
                 NotificationMessage checkmateNote =
                         new NotificationMessage("WHITE is in checkmate");
                 broadcast(command.getGameID(), gson.toJson(checkmateNote));
 
             } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                game.setGameOver(true);
+                dao.updateGame(updatedGame);
+
                 NotificationMessage checkmateNote =
                         new NotificationMessage("BLACK is in checkmate");
                 broadcast(command.getGameID(), gson.toJson(checkmateNote));
 
             } else if (game.isInStalemate(ChessGame.TeamColor.WHITE) ||
                     game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                game.setGameOver(true);
+                dao.updateGame(updatedGame);
+
                 NotificationMessage stalemateNote =
                         new NotificationMessage("The game is in stalemate");
                 broadcast(command.getGameID(), gson.toJson(stalemateNote));
@@ -275,6 +305,12 @@ public class WebSocketHandler {
             }
 
             ChessGame game = gameData.game();
+
+            if (game.isGameOver()) {
+                sendError(ctx, "Error: game is over");
+                return;
+            }
+
             game.setGameOver(true);
 
             GameData updatedGame = new GameData(
