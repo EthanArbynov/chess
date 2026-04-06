@@ -349,4 +349,39 @@ public class Repl {
 
         return new ChessPosition(row, col);
     }
+
+    private void highlightMoves(Scanner scanner, WSClient ws) {
+        try {
+            ChessGame game = ws.getCurrentGame();
+            if (game == null) {
+                System.out.println("No game loaded yet.");
+                return;
+            }
+
+            System.out.print("Piece position (example e2): ");
+            String posText = scanner.nextLine().trim().toLowerCase();
+
+            ChessPosition position = parsePosition(posText);
+
+            if (game.getBoard().getPiece(position) == null) {
+                System.out.println("No piece at that position.");
+                return;
+            }
+
+            var legalMoves = game.validMoves(position);
+            if (legalMoves == null) {
+                System.out.println("No legal moves.");
+                return;
+            }
+
+            BoardPrinter.drawBoardWithHighlights(game.getBoard(), blackPerspective(ws), position, legalMoves);
+
+        } catch (Exception e) {
+            System.out.println("Highlight failed: " + e.getMessage());
+        }
+    }
+
+    private boolean blackPerspective(WSClient ws) {
+        return ws.isBlackPerspective();
+    }
 }

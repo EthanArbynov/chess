@@ -75,4 +75,51 @@ public class BoardPrinter {
             };
         }
     }
+
+    public static void drawBoardWithHighlights(ChessBoard board,
+                                               boolean blackPerspective,
+                                               ChessPosition selected,
+                                               Collection<ChessMove> legalMoves) {
+        int[] rows = blackPerspective
+                ? new int[]{1,2,3,4,5,6,7,8}
+                : new int[]{8,7,6,5,4,3,2,1};
+
+        int[] cols = blackPerspective
+                ? new int[]{8,7,6,5,4,3,2,1}
+                : new int[]{1,2,3,4,5,6,7,8};
+
+        printColumnLabels(cols);
+
+        for (int row : rows) {
+            System.out.print(" " + row);
+
+            for (int col : cols) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+
+                String bgColor;
+
+                if (isSelectedSquare(row, col, selected)) {
+                    bgColor = EscapeSequences.SET_BG_COLOR_YELLOW;
+                } else if (isLegalMoveSquare(row, col, legalMoves)) {
+                    bgColor = EscapeSequences.SET_BG_COLOR_GREEN;
+                } else {
+                    boolean light = (row + col) % 2 != 0;
+                    bgColor = light
+                            ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
+                            : EscapeSequences.SET_BG_COLOR_DARK_GREY;
+                }
+
+                String pieceText = getPieceText(piece);
+
+                System.out.print(bgColor);
+                System.out.print(pieceText);
+                System.out.print(EscapeSequences.RESET_BG_COLOR);
+            }
+
+            System.out.println(" " + row);
+        }
+
+        printColumnLabels(cols);
+    }
 }
