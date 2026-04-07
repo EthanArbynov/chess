@@ -99,4 +99,5 @@ public class WSClient {
     public boolean isBlackPerspective() {
         return blackPerspective;
     }
+
 }

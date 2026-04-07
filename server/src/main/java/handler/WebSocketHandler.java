@@ -32,7 +32,7 @@ public class WebSocketHandler {
     public void handle(WsConfig ws) {
 
         ws.onConnect(ctx -> {
-            // do nothing yet
+
         });
 
         ws.onClose(ctx -> {
@@ -111,12 +111,10 @@ public class WebSocketHandler {
     private static class Connection {
         private final WsContext ctx;
         private final int gameID;
-        private final String username;
 
         public Connection(WsContext ctx, int gameID, String username) {
             this.ctx = ctx;
             this.gameID = gameID;
-            this.username = username;
         }
     }
 
