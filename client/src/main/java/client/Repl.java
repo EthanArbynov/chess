@@ -276,14 +276,18 @@ public class Repl {
                     case "resign":
                         if (observing) {
                             System.out.println("Observers cannot resign.");
-                        } else {
-                            System.out.print("Are you sure you want to resign? (yes/no): ");
-                            String confirm = scanner.nextLine().trim().toLowerCase();
-                            if (confirm.equals("yes")) {
-                                ws.sendResign();
-                                System.out.println("You resigned.");
-                            }
+                            break;
                         }
+
+                        System.out.print("Are you sure you want to resign? (yes/no): ");
+                        String confirm = scanner.nextLine().trim().toLowerCase();
+
+                        if (!confirm.equals("yes")) {
+                            break;
+                        }
+
+                        ws.sendResign();
+                        System.out.println("You resigned.");
                         break;
                     case "highlight":
                         highlightMoves(scanner, ws);
